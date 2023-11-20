@@ -13,10 +13,6 @@ curl -sfL https://get.k3s.io | sh -
 ```
 The installation includes additional utilities such as `kubectl`, `crictl`, `ctr`, `k3s-killall.sh`, and `k3s-uninstall.sh`. `kubectl` will automatically use the `kubeconfig` file that gets written to `/etc/rancher/k3s/k3s.yaml` after the installation. By default, the container runtime that K3s uses is `containerd`. Docker is not needed, but can be installed if desired.   
 
-If we check the present working directory by running `pwd`, we should get 
-```bash
-/home/ubuntu
-```
 We might encounter some permissions issues when trying to use the `kubectl` command line tool. This can be resolved by running the following commands:
 ```bash
 mkdir ~/.kube
@@ -99,55 +95,6 @@ kubectl get pv
 kubectl get pvc
 ```
 
-### Installing Gen3 Microservices with Helm
-The Helm charts for the Gen3 services can be found in the [uc-cdis/gen3-helm repository](https://github.com/uc-cdis/gen3-helm.git). We'd like to add the Gen3 Helm chart repository. To do this, we run:  
-
-```bash
-helm repo add gen3 http://helm.gen3.org
-helm repo update
-```
-The Gen3 Helm chart repository contains the templates for all the microservices making up the Gen3 stack. For the `elastic-search-deployment` to run in a Linux host machine, we need to increase the max virtual memory areas by running:
-```bash
-sudo sysctl -w vm.max_map_count=262144
-``` 
-This setting will only last for the duration of the session. The host machine will be reset to the original value if it gets rebooted. For this change to be set permanently on the host machine, the `/etc/sysctl.conf` file needs to be edited with `vm.max_map_count=262144`. To see the current value, run `/sbin/sysctl vm.max_map_count`. More details can be found on the [official Elasticsearch website](https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html).   
-
-Some of the microservices require the `uwsgi-plugin` for Python 3. To install it, run the following:
-```bash
-sudo apt update  
-sudo apt install uwsgi-plugin-python3 
-```
-
-Before performing a `helm install`, we need to create a `values.yaml` file. This file should be inside the root and contain the contents of the `values.yaml` file that can be found in the root of this repository. Now the Helm installation can begin by running:
-```bash
-helm upgrade --install gen3-dev gen3/gen3 -f gen3/values.yaml 
-```
-In the above command, `gen3-dev` is the name of the release of the helm deployment. If the installation is successful, then a message similar to the following should be displayed in the terminal:
-```bash
-NAME: gen3-dev
-LAST DEPLOYED: Tue Nov 14 13:27:49 2023
-NAMESPACE: default
-STATUS: deployed
-REVISION: 1
-```
-If all went well, we should see the `revproxy-dev` deployment up and running with the following command:
-```bash
-kubectl get ingress
-```
-The output should look similar to this:
-| NAME          | CLASS   | HOSTS           | ADDRESS    | PORTS   | AGE |
-| ------------- | ------- | --------------- | ---------- | ------- | --- |
-| revproxy-dev  | traefik | gen3local.co.za | 10.0.2.238 | 80, 443 | 34s |
-
-The list of deployments can be seen by running:
-```bash
-kubectl get deployments
-```    
-
-![Gen3 services deployed](/public/assets/images/gen3-deployments-incomplete.png "Gen3 services deployed")   
-
-As can be seen in the screenshot above, not all of the deployments are ready. We need to investigate why this is the case.
-
 ### Grafana OSS in Kubernetes (Optional)   
 Grafana open source software (OSS) allows for the querying, visualising, alerting on, and exploring of metrics, logs, and traces wherever they are stored. Graphs and visualisations can be created from time-series database (TSDB) data with the tools that are provided by Grafana OSS. We'll be using the [Grafana documentation](https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/) to guide us in installing Grafana in our k8s cluster.   
 
@@ -229,6 +176,54 @@ To open it, simply run:
 ```bash
 k9s
 ```
+### Installing Gen3 Microservices with Helm
+The Helm charts for the Gen3 services can be found in the [uc-cdis/gen3-helm repository](https://github.com/uc-cdis/gen3-helm.git). We'd like to add the Gen3 Helm chart repository. To do this, we run:  
+
+```bash
+helm repo add gen3 http://helm.gen3.org
+helm repo update
+```
+The Gen3 Helm chart repository contains the templates for all the microservices making up the Gen3 stack. For the `elastic-search-deployment` to run in a Linux host machine, we need to increase the max virtual memory areas by running:
+```bash
+sudo sysctl -w vm.max_map_count=262144
+``` 
+This setting will only last for the duration of the session. The host machine will be reset to the original value if it gets rebooted. For this change to be set permanently on the host machine, the `/etc/sysctl.conf` file needs to be edited with `vm.max_map_count=262144`. To see the current value, run `/sbin/sysctl vm.max_map_count`. More details can be found on the [official Elasticsearch website](https://www.elastic.co/guide/en/elasticsearch/reference/current/vm-max-map-count.html).   
+
+Some of the microservices require the `uwsgi-plugin` for Python 3. To install it, run the following:
+```bash
+sudo apt update  
+sudo apt install uwsgi-plugin-python3 
+```
+
+Before performing a `helm install`, we need to create a `values.yaml` file that can be used to override default values specified in the Gen3 Helm templates. The Helm installation can begin by running:
+```bash
+helm upgrade --install gen3-dev gen3/gen3 -f gen3/values.yaml 
+```
+In the above command, `gen3-dev` is the name of the release of the helm deployment. If the installation is successful, then a message similar to the following should be displayed in the terminal:
+```bash
+NAME: gen3-dev
+LAST DEPLOYED: Tue Nov 14 13:27:49 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+```
+If all went well, we should see the `revproxy-dev` deployment up and running with the following command:
+```bash
+kubectl get ingress
+```
+The output should look similar to this:
+| NAME          | CLASS   | HOSTS           | ADDRESS        | PORTS   | AGE |
+| ------------- | ------- | --------------- | -------------- | ------- | --- |
+| revproxy-dev  | traefik | gen3local.co.za | 146.141.240.78 | 80, 443 | 34s |
+
+The list of deployments can be seen by running:
+```bash
+kubectl get deployments
+```    
+
+![Gen3 services deployed](/public/assets/images/gen3-deployments-incomplete.png "Gen3 services deployed")   
+
+As can be seen in the screenshot above, not all of the deployments are ready. We need to investigate why this is the case.   
 
 ### Troubleshooting Networking Issues
 Some of the deployments are not in a READY state. After running the following command,
@@ -237,19 +232,15 @@ sudo iptables -S
 ```
 the following information was found:
 ```bash
--A KUBE-SERVICES -d 10.43.96.97/32 -p tcp -m comment --comment "default/pidgin-service:https has no endpoints" -m tcp --dport 443 -j REJECT --reject-with icmp-port-unreachable   
-
--A KUBE-SERVICES -d 10.43.75.180/32 -p tcp -m comment --comment "default/peregrine-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable   
-
--A KUBE-SERVICES -d 10.43.96.97/32 -p tcp -m comment --comment "default/pidgin-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable   
-
--A KUBE-SERVICES -d 10.43.137.140/32 -p tcp -m comment --comment "default/sheepdog-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable   
-
--A KUBE-SERVICES -d 10.43.189.139/32 -p tcp -m comment --comment "default/portal-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable   
-
--A KUBE-SERVICES -d 10.43.162.217/32 -p tcp -m comment --comment "default/gen3-dev-manifestservice:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable   
-
--A KUBE-SERVICES -d 10.43.98.195/32 -p tcp -m comment --comment "default/elasticsearch has no endpoints" -m tcp --dport 9200 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.248.157/32 -p tcp -m comment --comment "default/peregrine-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.45.52/32 -p tcp -m comment --comment "default/pidgin-service:https has no endpoints" -m tcp --dport 443 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.45.52/32 -p tcp -m comment --comment "default/pidgin-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.214.116/32 -p tcp -m comment --comment "default/workspace-token-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.252.154/32 -p tcp -m comment --comment "default/portal-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.168.94/32 -p tcp -m comment --comment "default/sheepdog-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.214.116/32 -p tcp -m comment --comment "default/workspace-token-service:https has no endpoints" -m tcp --dport 443 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.120.234/32 -p tcp -m comment --comment "default/gen3-dev-manifestservice:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
+-A KUBE-SERVICES -d 10.43.145.199/32 -p tcp -m comment --comment "default/elasticsearch has no endpoints" -m tcp --dport 9200 -j REJECT --reject-with icmp-port-unreachable
 ```
 When running
 ```bash
@@ -282,4 +273,4 @@ indexd-service               | 10.42.0.222:80                  | 58m |
 fence-service                | 10.42.0.225:80                  | 58m |
 workspace-token-service      | 10.42.0.238:443,10.42.0.238:80  | 58m |
 
-Perhaps the solution entails explicitly allowing traffic to those IP addresses listed above with the `--reject-with icmp-port-unreachable` flag.
+Perhaps the solution entails explicitly allowing traffic to those IP addresses listed above with the `--reject-with icmp-port-unreachable` flag, or maybe the ingress controller and/or network policy needs to be configured differently.
