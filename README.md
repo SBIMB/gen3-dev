@@ -294,8 +294,52 @@ When running the cURL command,
 ```bash
 curl https://s3.amazonaws.com/dictionary-artifacts/datadictionary/develop/schema.json
 ```
-from inside the VM, a full JSON response is received. However, when running that same cURL command from inside the pod (with the `--image=nicolaka/netshoot` container running), we get that same ssl connection refused error (see image).   
-![Netshoot Troubleshooting](/public/assets/images/netshoot-troubleshooting.png "Netshoot Troubleshooting")   
+from inside the VM, a full JSON response is received. However, when running that same cURL command from inside the pod (with the `--image=nicolaka/netshoot` container running for debugging purposes), we get an ssl connection refused error (see image).   
+![Netshoot Debugging](/public/assets/images/netshoot-debugging.png "Netshoot Debugging")   
+
+The command for debugging the container is
+```bash
+kubectl debug <podname> -it --image=nicolaka/netshoot
+```
+and the command for entering into a running container is
+```bash
+kubectl exec --stdin --tty <podname> -- bash
+```
+There is reason to believe that certain certificates which are on the host machine are not present or accessible in the containers.   
+
+We could also create a `netshoot-pod` in the `default` namespace by using the following manifest:   
+**netshoot-pod.yaml**
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netshoot-pod
+  namespace: default
+spec:
+  containers:
+  - name: netshoot
+    image: nicolaka/netshoot
+    command: ["/bin/bash", "-c", "--"]
+    args: ["while true; do sleep 30; done;"]
+```
+The pod can be created with:
+```bash
+kubectl apply -f netshoot-pod.yaml
+```
+and a shell to the `netshoot-pod` container can be opened with:
+```bash
+kubectl exec -it netshoot-pod -- /bin/bash
+```
+While inside the container, we can hit external endpoints like:
+```bash
+curl http://example.com -I
+```
+The goal of performing such exercises is to see if containers inside the cluster can make network requests to services outside of the cluster. The following two screenshots clearly indicate that there is a problem when trying to reach external services from within the cluster.   
+
+![HTTP Request from inside Netshoot Container](/public/assets/images/netshoot-curl-http.png "HTTP Request from inside Netshoot Container")    
+
+![HTTPS Request from inside Netshoot Container](/public/assets/images/netshoot-curl-https.png "HTTPS Request from inside Netshoot Container")   
+
 
 ### Upgrading Traefik Ingress to v2.10
 From the root, we can navigate to `/var/lib/rancher/k3s/server/manifests` and see the contents of the `traefik.yaml` file, which should **never** be edited manually:
@@ -379,4 +423,4 @@ kubectl edit clusterrole traefik-kube-system
 ```
 ![traefik-kube-system Cluster Role](/public/assets/images/traefik-kube-system-cluster-role.png "traefik-kube-system Cluster Role")   
 
-All api groups in Traefik resources need to be changed from `traefik.containo.us/v1alpha1` to `traefik.io/v1alpha1`.
+All api groups in Traefik resources need to be changed from `traefik.containo.us/v1alpha1` to `traefik.io/v1alpha1`. This is complex and inconvenient. We might reconsider using Traefik as an ingress controller in favour of NGINX.
