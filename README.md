@@ -340,7 +340,15 @@ The goal of performing such exercises is to see if containers inside the cluster
 
 ![HTTPS Request from inside Netshoot Container](/public/assets/images/netshoot-curl-https.png "HTTPS Request from inside Netshoot Container")   
 
+These requests fail. However, when setting `hostNetwork: true` in the `.spec` of the pod definition, then there is a successful response.   
 
+![Host Network True](/public/assets/images/netshoot-hostnetwork-true.png "Host Network True")    
+
+Setting `hostNetwork: true` in the `.spec` of the pod templates of the Gen3 deployments does not work as desired. Errors of the type 
+```bash
+0/1 nodes are available: 1 node(s) didn't have free ports for the requested pod ports. preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod
+``` 
+are encountered. We need to determine if the Flannel is responsible for this network behaviour, and perhaps a different CNI should be installed (like Calico or Cilium).
 ### Upgrading Traefik Ingress to v2.10
 From the root, we can navigate to `/var/lib/rancher/k3s/server/manifests` and see the contents of the `traefik.yaml` file, which should **never** be edited manually:
 ```bash
