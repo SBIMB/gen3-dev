@@ -12,25 +12,25 @@ global:
   # Currently this is being used to share ALB's if you have multiple namespaces in same cluster.
   # environment: default
   # -- (string) Hostname for the deployment.
-  hostname: gen3local.co.za
+  hostname: cloud08.core.wits.ac.za
   # -- (string) ARN of the reverse proxy certificate.
-  # revproxyArn: arn:aws:acm:us-east-1:123456:certificate
-  # # -- (string) URL of the data dictionary.
-  # dictionaryUrl: https://s3.amazonaws.com/dictionary-artifacts/datadictionary/develop/schema.json
+  revproxyArn: arn:aws:acm:us-east-1:123456:certificate
+  # -- (string) URL of the data dictionary.
+  dictionaryUrl: https://s3.amazonaws.com/dictionary-artifacts/datadictionary/develop/schema.json
   # -- (string) Portal application name.
-  # portalApp: gitops
-  # # -- (bool) Whether public datasets are enabled.
-  # publicDataSets: true
-  # # -- (string) Access level for tiers. acceptable values for `tier_access_level` are: `libre`, `regular` and `private`. If omitted, by default common will be treated as `private`
-  # tierAccessLevel: libre
-  # # -- (int) Only relevant if tireAccessLevel is set to "regular". Summary charts below this limit will not appear for aggregated data.
-  # tierAccessLimit: 1000
-  # # -- (bool) Whether network policies are enabled.
-  # netPolicy: true
-  # # -- (int) Number of dispatcher jobs.
-  # dispatcherJobNum: 10
-  # # -- (bool) Whether Datadog is enabled.
-  # ddEnabled: false
+  portalApp: gitops
+  # -- (bool) Whether public datasets are enabled.
+  publicDataSets: true
+  # -- (string) Access level for tiers. acceptable values for `tier_access_level` are: `libre`, `regular` and `private`. If omitted, by default common will be treated as `private`
+  tierAccessLevel: libre
+  # -- (int) Only relevant if tireAccessLevel is set to "regular". Summary charts below this limit will not appear for aggregated data.
+  tierAccessLimit: 1000
+  # -- (bool) Whether network policies are enabled.
+  netPolicy: true
+  # -- (int) Number of dispatcher jobs.
+  dispatcherJobNum: 10
+  # -- (bool) Whether Datadog is enabled.
+  ddEnabled: false
 
 # Dependency Charts
 ambassador:

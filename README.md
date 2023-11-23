@@ -9,9 +9,15 @@ The ultimate goal for having this cluster up and running is to administer and or
 ### K3s
 The installation script for K3s can be used as follows:
 ```bash
-curl -sfL https://get.k3s.io | sh -
+sudo curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 ```
-The installation includes additional utilities such as `kubectl`, `crictl`, `ctr`, `k3s-killall.sh`, and `k3s-uninstall.sh`. `kubectl` will automatically use the `kubeconfig` file that gets written to `/etc/rancher/k3s/k3s.yaml` after the installation. By default, the container runtime that K3s uses is `containerd`. Docker is not needed, but can be installed if desired.   
+The installation includes additional utilities such as `kubectl`, `crictl`, `ctr`, `k3s-killall.sh`, and `k3s-uninstall.sh`. `kubectl` will automatically use the `kubeconfig` file that gets written to `/etc/rancher/k3s/k3s.yaml` after the installation. By default, the container runtime that K3s uses is `containerd`.    
+
+Docker is not needed, but can be installed if desired. To use Docker as the container runtime, the following command should be run:
+```bash
+curl https://releases.rancher.com/install-docker/20.10.sh | sh
+```
+This will let K3s use Docker instead of Containerd. 
 
 We might encounter some permissions issues when trying to use the `kubectl` command line tool. This can be resolved by running the following commands:
 ```bash
@@ -22,6 +28,16 @@ export KUBECONFIG=~/.kube/config
 ```
 For these updates to persist upon reboot, the `.profile` and `.bashrc` files should be updated with `export KUBECONFIG=~/.kube/config`.   
 
+After about a minute or so, the following command can be run to see if the cluster is in good shape:
+```bash
+kubectl get all -n kube-system
+```
+![Resources in kube-system Namespace](/public/assets/images/kube-system-resources.png "Resources in kube-system Namespace")   
+
+If something is not quite right and there is a desire to re-install K3s with some other features enabled/disabled, it can be fully uninstalled with:
+```bash
+/usr/local/bin/k3s-uninstall.sh
+```
 ### Helm
 [Helm](https://helm.sh/) is a package manager for Kubernetes that allows for the installation or deployment of applications onto a Kubernetes cluster. We can install it as follows:
 ```bash
@@ -117,43 +133,7 @@ The `grafana` service should have an **EXTERNAL-IP**. This IP can be used to acc
 kubectl port-forward service/grafana 3000:3000 --namespace=gen3-grafana
 ```
 Then the Grafana sign-in page can be accessed on `http://<ip-address>:3000`. Use `admin` for both the username and the password.   
-![Grafana Login Page](/public/assets/images/grafana-login-page.png "Grafana Login Page")   
-
-### Docker (Optional)
-To use Docker as the container runtime, the following command should be run:
-```bash
-curl https://releases.rancher.com/install-docker/20.10.sh | sh
-```
-This will let K3s use Docker instead of Containerd.   
-
-#### More Detailed Process for Docker Installation (not necessary if the above script works)
-Let us go through the steps to install [Docker](https://docs.docker.com/get-started/overview/). We'll begin by doing a general software dependency update:
-```bash
-apt-get update
-```
-Add the official Docker GPG key:
-```bash
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-```
-Add the Docker repository:
-```bash
-echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-$(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
-```
-Install the necessary Docker dependencies:
-```bash
-sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release -y
-```
-The following two commands will install the latest version of the Docker engine:
-```bash
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io -y
-```
-Add the user to the Docker group  with the following command:
-```bash
-sudo usermod -aG docker $USER
-```
-End the terminal session and then restart it. Docker should be installed.    
+![Grafana Login Page](/public/assets/images/grafana-login-page.png "Grafana Login Page")      
 
 ### Running a PostgreSQL Database inside a Docker Container (Optional)
 A postgreSQL database can be created to run inside a Docker container. This should not be in the Kubernetes cluster. This is not necessary for testing, but would be required if a persistent database is required. The following commands can be copied into a script called `init-db.sh` for convenience, or they could be run independently, but sequentially, as follows:
@@ -348,7 +328,50 @@ Setting `hostNetwork: true` in the `.spec` of the pod templates of the Gen3 depl
 ```bash
 0/1 nodes are available: 1 node(s) didn't have free ports for the requested pod ports. preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod
 ``` 
-are encountered. We need to determine if the Flannel is responsible for this network behaviour, and perhaps a different CNI should be installed (like Calico or Cilium).
+are encountered. We need to determine if Flannel is responsible for this network behaviour, and perhaps a different CNI should be installed (like Calico or Cilium). Before resorting to such drastic measures (I know very little about CNIs), it might be safer to restart K3s with the following flag set: `--disable-network-policy`, since K3s includes an embedded network policy controller.    
+
+Adding the following rules to the `iptables` script might help:
+```bash
+#K3s Cluster
+$ipt -A INPUT -d 10.42.0.9 -j ACCEPT
+$ipt -A OUTPUT -d 10.42.0.9 -j ACCEPT
+$ipt -A INPUT -d 10.43.0.0/16 -j ACCEPT
+$ipt -A OUTPUT -d 10.43.0.0/16 -j ACCEPT
+$ipt -A INPUT -d 10.42.0.0/16 -j ACCEPT
+$ipt -A OUTPUT -d 10.42.0.0/16 -j ACCEPT
+$ipt -A INPUT -i eth0 -p tcp --dport 6443 -m state --state NEW,ESTABLISHED -j ACCEPT
+$ipt -A INPUT -i eth0 -p tcp --dport 10250 -m state --state NEW,ESTABLISHED -j ACCEPT
+$ipt -A INPUT -i eth0 -p tcp -m tcp --dport 0:65535 -j ACCEPT
+$ipt -A INPUT -i eth0 -p tcp -m tcp --dport 2379:2380 -j ACCEPT
+$ipt -A INPUT -p udp --dport 8472 -m multiport --sports 0:65535 -j ACCEPT
+$ipt -A INPUT -p udp --dport 51820 -m multiport --sports 0:65535 -j ACCEPT
+$ipt -A INPUT -p udp --dport 51821 -m multiport --sports 0:65535 -j ACCEPT
+$ipt -A INPUT -i eth0 -p tcp --dport 80 -m comment --comment "# http #" -j ACCEPT
+$ipt -A INPUT -i eth0 -p tcp --dport 443 -m comment --comment "# https #" -j ACCEPT
+```
+To temporarily disable the Firewall, run the following:
+```bash
+sudo iptables -P INPUT ACCEPT
+sudo iptables -P FORWARD ACCEPT
+sudo iptables -P OUTPUT ACCEPT
+sudo iptables -t nat -F
+sudo iptables -t mangle -F
+sudo iptables -F
+sudo iptables -X
+```
+
+While inside the `netshoot` pod, we can run 
+```bash
+cat /etc/resolv.conf
+```
+to see which nameserver address the pod is using. We get an output of the form,
+```bash
+search default.svc.cluster.local svc.cluster.local cluster.local DOMAINS
+nameserver 10.43.0.10
+options ndots:5
+```   
+which has the same ip address as the `service/kube-dns` in the `kube-system` namespace.
+
 ### Upgrading Traefik Ingress to v2.10
 From the root, we can navigate to `/var/lib/rancher/k3s/server/manifests` and see the contents of the `traefik.yaml` file, which should **never** be edited manually:
 ```bash
