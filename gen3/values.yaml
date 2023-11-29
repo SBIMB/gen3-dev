@@ -69,8 +69,8 @@ aws-es-proxy:
     tag: "master"
   esEndpoint: test.us-east-1.es.amazonaws.com
   secrets:
-    awsAccessKeyId: "AKIA5VDDU6BP66WC3OWD"
-    awsSecretAccessKey: "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"
+    awsAccessKeyId: ""
+    awsSecretAccessKey: ""
 
 fence:
   enabled: true
@@ -86,13 +86,13 @@ fence:
     APP_NAME: 'Gen3 Data Commons with K3s'
     OPENID_CONNECT:
       google:
-        client_id: "74368225896-pmvm2u0l7736fsij52qpj1a6q95gi4qe.apps.googleusercontent.com"
-        client_secret: "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"
+        client_id: ""
+        client_secret: ""
         # MOCK_AUTH: true
     AWS_CREDENTIALS:
       "gen3-user":
-        aws_access_key_id: "AKIA5VDDU6BP66WC3OWD"
-        aws_secret_access_key: "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"
+        aws_access_key_id: ""
+        aws_secret_access_key: ""
     S3_BUCKETS:
       gen3-bucket:
         cred: "gen3-user"
@@ -108,9 +108,9 @@ fence:
     # -- (map) Secret information
     secrets:
       # -- (str) AWS access key ID for usersync S3 bucket
-      awsAccessKeyId: "AKIA5VDDU6BP66WC3OWD"
+      awsAccessKeyId: ""
       # -- (str) AWS secret access key for usersync S3 bucket
-      awsSecretAccessKey: "EjrOGROOb2SWJdTRGw9PmuxhH5RXjP43uf2rmjhb"
+      awsSecretAccessKey: ""
     # -- (string) The cron schedule expression to use in the usersync cronjob. Runs every 30 minutes by default.
     schedule: "*/30 * * * *"
     # -- (string) To set a custom image for pulling the user.yaml file from S3. Default is the Gen3 Awshelper image.
@@ -211,7 +211,7 @@ indexd:
     tag: "master"
   dbRestore: false
   postgres:
-    password: "LAI1hY5RYLfb0wjdZYyw"
+    password: ""
 
 manifestservice:
   enabled: true
@@ -306,5 +306,5 @@ wts:
     tag: "feat_wts_internalfence"
 
 secrets:
-  awsAccessKeyId: "AKIA5VDDU6BP66WC3OWD"
-  awsSecretAccessKey: "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"
+  awsAccessKeyId: ""
+  awsSecretAccessKey: ""
