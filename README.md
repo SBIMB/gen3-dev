@@ -7,7 +7,7 @@ The ultimate goal for having this cluster up and running is to administer and or
 
 ## Installation
 ### K3s
-The installation script for K3s can be used as follows:
+The installation script for K3s, with default load balancer `servicelb` (also known as `klipper`) and default ingress controller `traefik` can be used as follows:
 ```bash
 sudo curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 ```
@@ -17,7 +17,13 @@ Docker is not needed, but can be installed if desired. To use Docker as the cont
 ```bash
 curl https://releases.rancher.com/install-docker/20.10.sh | sh
 ```
-This will let K3s use Docker instead of Containerd. 
+This will let K3s use Docker instead of Containerd.   
+
+However, if we wish to use a different load balancer or different ingress controller, then the default ones can be disabled when running the installation script:
+```bash
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable servicelb --disable traefik" sh -s - --write-kubeconfig-mode 644
+```
+In our case, we'd like to use the [metallb load balancer](https://metallb.universe.tf/) and the [nginx ingress controller](https://docs.nginx.com/nginx-ingress-controller/installation/installing-nic/).   
 
 We might encounter some permissions issues when trying to use the `kubectl` command line tool. This can be resolved by running the following commands:
 ```bash
@@ -38,6 +44,8 @@ If something is not quite right and there is a desire to re-install K3s with som
 ```bash
 /usr/local/bin/k3s-uninstall.sh
 ```
+In such a xase, remember to delete the `.kube` directory so that there aren't any certificate issues with a fresh re-install.   
+
 ### Helm
 [Helm](https://helm.sh/) is a package manager for Kubernetes that allows for the installation or deployment of applications onto a Kubernetes cluster. We can install it as follows:
 ```bash
@@ -54,115 +62,6 @@ and we should get an empty table as our output,
 | ------------- | --------- | --------- | ------- | ------- | ----- | ----------- |
 |               |           |           |         |         |       |             |
 
-### Longhorn
-[Longhorn](https://longhorn.io/docs/1.5.1/) is an open-source distributed block storage system for Kubernetes, and is supported by K3s. To install Longhorn, we apply the `longhorn.yaml`:
-
-```bash
-kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.5.1/deploy/longhorn.yaml
-```
-
-We need to create a persistent volume claim and a pod to make use of it:   
-
-**longhorn-volv-pvc.yaml**
-```yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: longhorn-volv-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: longhorn
-  resources:
-    requests:
-      storage: 2Gi
-```
-
-**volume-test-pod.yaml**
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: volume-test
-  namespace: default
-spec:
-  containers:
-  - name: volume-test
-    image: nginx:stable-alpine
-    imagePullPolicy: IfNotPresent
-    volumeMounts:
-    - name: volv
-      mountPath: /data
-    ports:
-    - containerPort: 80
-  volumes:
-  - name: volv
-    persistentVolumeClaim:
-      claimName: longhorn-volv-pvc
-```
-To create the `longhorn-volv-pvc` and `volume-test-pod` defined above, we need to be apply the YAML:
-```bash
-kubectl create -f longhorn-volv-pvc.yaml
-kubectl create -f volume-test-pod.yaml
-```
-The creation of the persistent volume and persistent volume claim can be confirmed by running the following command:
-```bash
-kubectl get pv
-kubectl get pvc
-```
-
-### Grafana OSS in Kubernetes (Optional)   
-Grafana open source software (OSS) allows for the querying, visualising, alerting on, and exploring of metrics, logs, and traces wherever they are stored. Graphs and visualisations can be created from time-series database (TSDB) data with the tools that are provided by Grafana OSS. We'll be using the [Grafana documentation](https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/) to guide us in installing Grafana in our k8s cluster.   
-
-To create a namespace for Grafana, run the following command:
-```bash
-kubectl create namespace gen3-grafana
-```
-We'll create a `grafana.yaml` file which will contain the blueprint for a persistent volume claim (pvc), a service of type loadbalancer, and a deployment. This file can be found in the `gen3` directory of this repo. To create these resources, we need to apply the manifest as follows:
-```bash
-kubectl apply -f gen3/grafana.yaml --namespace=gen3-grafana
-```
-To get all information about the Grafana deplyment, run:
-```bash
-kubectl get all --namespace=gen3-grafana
-```
-![Grafana k8s Objects](/public/assets/images/grafana-k8s-objects.png "Grafana k8s Objects")  
-
-The `grafana` service should have an **EXTERNAL-IP**. This IP can be used to access the Grafana sign-in page in the browser. If there is no **EXTERNAL_IP**, then port-forwarding can be performed like this:
-```bash
-kubectl port-forward service/grafana 3000:3000 --namespace=gen3-grafana
-```
-Then the Grafana sign-in page can be accessed on `http://<ip-address>:3000`. Use `admin` for both the username and the password.   
-![Grafana Login Page](/public/assets/images/grafana-login-page.png "Grafana Login Page")      
-
-### Running a PostgreSQL Database inside a Docker Container (Optional)
-A postgreSQL database can be created to run inside a Docker container. This should not be in the Kubernetes cluster. This is not necessary for testing, but would be required if a persistent database is required. The following commands can be copied into a script called `init-db.sh` for convenience, or they could be run independently, but sequentially, as follows:
-```bash
-echo "Start postgres docker container"
-docker run --rm --name gen3-dev-db -e POSTGRES_PASSWORD=gen3-password -d -p 5432:5432 -v postgres_gen3_dev:/var/lib/postgresql/data postgres:14
-echo "Database starting..."
-sleep 10
-echo "Create gen3 Database"
-docker exec -it gen3-dev-db bash -c 'PGPASSWORD=gen3-password psql -U postgres -c "create database gen3_db"'
-echo "Create gen3_schema Schema"
-docker exec -it gen3-dev-db bash -c 'PGPASSWORD=gen3-password psql -U postgres -d gen3_db -c "create schema gen3_schema"'
-```
-If the script runs successfully, the output should look like:
-![Gen3 PostgreSQL Database](/public/assets/images/gen3-db.png "Gen3 PostgreSQL Database")   
-By default, the hostname of the database is the container id.   
-
-### Installing the k9s Tool (Optional)
-**k9s** is a useful tool that makes troubleshooting issues in a Kubernetes cluster easier. Installing it is highly recommended. It can be downloaded and installed as follows:
-```bash
-wget https://github.com/derailed/k9s/releases/download/v0.25.18/k9s_Linux_x86_64.tar.gz
-tar -xzvf k9s_Linux_x86_64.tar.gz
-chmod +x k9s
-sudo mv k9s /usr/local/bin/
-```
-To open it, simply run:
-```bash
-k9s
-```
 ### Installing Gen3 Microservices with Helm
 The Helm charts for the Gen3 services can be found in the [uc-cdis/gen3-helm repository](https://github.com/uc-cdis/gen3-helm.git). We'd like to add the Gen3 Helm chart repository. To do this, we run:  
 
@@ -212,246 +111,3 @@ kubectl get deployments
 
 As can be seen in the screenshot above, not all of the deployments are ready. We need to investigate why this is the case.   
 
-### Troubleshooting Networking Issues
-Some of the deployments are not in a READY state. After running the following command,
-```bash
-sudo iptables -S
-```
-the following information was found:
-```bash
--A KUBE-SERVICES -d 10.43.248.157/32 -p tcp -m comment --comment "default/peregrine-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
--A KUBE-SERVICES -d 10.43.45.52/32 -p tcp -m comment --comment "default/pidgin-service:https has no endpoints" -m tcp --dport 443 -j REJECT --reject-with icmp-port-unreachable
--A KUBE-SERVICES -d 10.43.45.52/32 -p tcp -m comment --comment "default/pidgin-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
--A KUBE-SERVICES -d 10.43.214.116/32 -p tcp -m comment --comment "default/workspace-token-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
--A KUBE-SERVICES -d 10.43.252.154/32 -p tcp -m comment --comment "default/portal-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
--A KUBE-SERVICES -d 10.43.168.94/32 -p tcp -m comment --comment "default/sheepdog-service:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
--A KUBE-SERVICES -d 10.43.214.116/32 -p tcp -m comment --comment "default/workspace-token-service:https has no endpoints" -m tcp --dport 443 -j REJECT --reject-with icmp-port-unreachable
--A KUBE-SERVICES -d 10.43.120.234/32 -p tcp -m comment --comment "default/gen3-dev-manifestservice:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
--A KUBE-SERVICES -d 10.43.145.199/32 -p tcp -m comment --comment "default/elasticsearch has no endpoints" -m tcp --dport 9200 -j REJECT --reject-with icmp-port-unreachable
-```
-When running
-```bash
-kubectl get endpoints
-```
-the following output is received:   
-| NAME                       | ENDPOINTS                       | AGE |
-| -------------------------- | ------------------------------- | --- |
-kubernetes                   | 146.141.240.78:6443             | 17d |
-gen3-dev-manifestservice     | <none>                          | 58m |
-peregrine-service            |                                 | 58m |
-sheepdog-service             |                                 | 58m |
-elasticsearch                |                                 | 58m |
-gen3-dev-postgresql-hl       | 10.42.0.227:5432                | 58m |
-hatchery-service             | 10.42.0.218:8000                | 58m |
-sower-service                | 10.42.0.224:8000                | 58m |
-gen3-dev-postgresql          | 10.42.0.227:5432                | 58m |
-pidgin-service               |                                 | 58m |
-argo-wrapper-service         | 10.42.0.240:8000                | 58m |
-portal-service               |                                 | 58m |
-revproxy-service             | 10.42.0.242:80                  | 58m |
-ambassador-service           | 10.42.0.247:8080                | 58m |
-ambassador-admin             | 10.42.0.247:8877                | 58m |
-arborist-service             | 10.42.0.243:80                  | 58m |
-metadata-service             | 10.42.0.226:80                  | 58m |
-presigned-url-fence-service  | 10.42.0.235:80                  | 58m |
-audit-service                | 10.42.0.220:80                  | 58m |
-requestor-service            | 10.42.0.245:80                  | 58m |
-indexd-service               | 10.42.0.222:80                  | 58m |
-fence-service                | 10.42.0.225:80                  | 58m |
-workspace-token-service      | 10.42.0.238:443,10.42.0.238:80  | 58m |
-
-Perhaps the solution entails explicitly allowing traffic to those IP addresses listed above with the `--reject-with icmp-port-unreachable` flag, or maybe the ingress controller and/or network policy needs to be configured differently. There’s a `KUBE-SERVICES` chain in the target that’s created by `kube-proxy`. We can list the rules in that chain as follows:
-```bash
-sudo iptables -t nat -L KUBE-SERVICES -n  | column -t
-```   
-A long list of services will be displayed, however, the `peregrine`, `pidgin`, `elasticsearch`, `sheepdog`, and the `portal` services are not listed. Somehow the Firewall or the `kube-proxy` is blocking traffic to those services.   
-
-The `peregrine` deployment pod refuses to reach a READY state due to some SSL error of the form
-```bash
-ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:852)
-```
-When running the cURL command,
-```bash
-curl https://s3.amazonaws.com/dictionary-artifacts/datadictionary/develop/schema.json
-```
-from inside the VM, a full JSON response is received. However, when running that same cURL command from inside the pod (with the `--image=nicolaka/netshoot` container running for debugging purposes), we get an ssl connection refused error (see image).   
-![Netshoot Debugging](/public/assets/images/netshoot-debugging.png "Netshoot Debugging")   
-
-The command for debugging the container is
-```bash
-kubectl debug <podname> -it --image=nicolaka/netshoot
-```
-and the command for entering into a running container is
-```bash
-kubectl exec --stdin --tty <podname> -- bash
-```
-There is reason to believe that certain certificates which are on the host machine are not present or accessible in the containers.   
-
-We could also create a `netshoot-pod` in the `default` namespace by using the following manifest:   
-**netshoot-pod.yaml**
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: netshoot-pod
-  namespace: default
-spec:
-  containers:
-  - name: netshoot
-    image: nicolaka/netshoot
-    command: ["/bin/bash", "-c", "--"]
-    args: ["while true; do sleep 30; done;"]
-```
-The pod can be created with:
-```bash
-kubectl apply -f netshoot-pod.yaml
-```
-and a shell to the `netshoot-pod` container can be opened with:
-```bash
-kubectl exec -it netshoot-pod -- /bin/bash
-```
-While inside the container, we can hit external endpoints like:
-```bash
-curl http://example.com -I
-```
-The goal of performing such exercises is to see if containers inside the cluster can make network requests to services outside of the cluster. The following two screenshots clearly indicate that there is a problem when trying to reach external services from within the cluster.   
-
-![HTTP Request from inside Netshoot Container](/public/assets/images/netshoot-curl-http.png "HTTP Request from inside Netshoot Container")    
-
-![HTTPS Request from inside Netshoot Container](/public/assets/images/netshoot-curl-https.png "HTTPS Request from inside Netshoot Container")   
-
-These requests fail. However, when setting `hostNetwork: true` in the `.spec` of the pod definition, then there is a successful response.   
-
-![Host Network True](/public/assets/images/netshoot-hostnetwork-true.png "Host Network True")    
-
-Setting `hostNetwork: true` in the `.spec` of the pod templates of the Gen3 deployments does not work as desired. Errors of the type 
-```bash
-0/1 nodes are available: 1 node(s) didn't have free ports for the requested pod ports. preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod
-``` 
-are encountered. We need to determine if Flannel is responsible for this network behaviour, and perhaps a different CNI should be installed (like Calico or Cilium). Before resorting to such drastic measures (I know very little about CNIs), it might be safer to restart K3s with the following flag set: `--disable-network-policy`, since K3s includes an embedded network policy controller.    
-
-Adding the following rules to the `iptables` script might help:
-```bash
-#K3s Cluster
-$ipt -A INPUT -d 10.42.0.9 -j ACCEPT
-$ipt -A OUTPUT -d 10.42.0.9 -j ACCEPT
-$ipt -A INPUT -d 10.43.0.0/16 -j ACCEPT
-$ipt -A OUTPUT -d 10.43.0.0/16 -j ACCEPT
-$ipt -A INPUT -d 10.42.0.0/16 -j ACCEPT
-$ipt -A OUTPUT -d 10.42.0.0/16 -j ACCEPT
-$ipt -A INPUT -i eth0 -p tcp --dport 6443 -m state --state NEW,ESTABLISHED -j ACCEPT
-$ipt -A INPUT -i eth0 -p tcp --dport 10250 -m state --state NEW,ESTABLISHED -j ACCEPT
-$ipt -A INPUT -i eth0 -p tcp -m tcp --dport 0:65535 -j ACCEPT
-$ipt -A INPUT -i eth0 -p tcp -m tcp --dport 2379:2380 -j ACCEPT
-$ipt -A INPUT -p udp --dport 8472 -m multiport --sports 0:65535 -j ACCEPT
-$ipt -A INPUT -p udp --dport 51820 -m multiport --sports 0:65535 -j ACCEPT
-$ipt -A INPUT -p udp --dport 51821 -m multiport --sports 0:65535 -j ACCEPT
-$ipt -A INPUT -i eth0 -p tcp --dport 80 -m comment --comment "# http #" -j ACCEPT
-$ipt -A INPUT -i eth0 -p tcp --dport 443 -m comment --comment "# https #" -j ACCEPT
-```
-To temporarily disable the Firewall, run the following:
-```bash
-sudo iptables -P INPUT ACCEPT
-sudo iptables -P FORWARD ACCEPT
-sudo iptables -P OUTPUT ACCEPT
-sudo iptables -t nat -F
-sudo iptables -t mangle -F
-sudo iptables -F
-sudo iptables -X
-```
-
-While inside the `netshoot` pod, we can run 
-```bash
-cat /etc/resolv.conf
-```
-to see which nameserver address the pod is using. We get an output of the form,
-```bash
-search default.svc.cluster.local svc.cluster.local cluster.local DOMAINS
-nameserver 10.43.0.10
-options ndots:5
-```   
-which has the same ip address as the `service/kube-dns` in the `kube-system` namespace.
-
-### Upgrading Traefik Ingress to v2.10
-From the root, we can navigate to `/var/lib/rancher/k3s/server/manifests` and see the contents of the `traefik.yaml` file, which should **never** be edited manually:
-```bash
-cat traefik.yaml
-```
-```yaml
----
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: traefik-crd
-  namespace: kube-system
-spec:
-  chart: https://%{KUBERNETES_API}%/static/charts/traefik-crd-21.2.1+up21.2.0.tgz
----
-apiVersion: helm.cattle.io/v1
-kind: HelmChart
-metadata:
-  name: traefik
-  namespace: kube-system
-spec:
-  chart: https://%{KUBERNETES_API}%/static/charts/traefik-21.2.1+up21.2.0.tgz
-  set:
-    global.systemDefaultRegistry: ""
-  valuesContent: |-
-    podAnnotations:
-      prometheus.io/port: "8082"
-      prometheus.io/scrape: "true"
-    providers:
-      kubernetesIngress:
-        publishedService:
-          enabled: true
-    priorityClassName: "system-cluster-critical"
-    image:
-      repository: "rancher/mirrored-library-traefik"
-      tag: "2.10.5"
-    tolerations:
-    - key: "CriticalAddonsOnly"
-      operator: "Exists"
-    - key: "node-role.kubernetes.io/control-plane"
-      operator: "Exists"
-      effect: "NoSchedule"
-    - key: "node-role.kubernetes.io/master"
-      operator: "Exists"
-      effect: "NoSchedule"
-    service:
-      ipFamilyPolicy: "PreferDualStack"
-```
-**NOTE:** Permissions for entering this directory might be denied, so the following command should be run by a root user:
-```bash
-sudo chmod -R 777 var/lib
-```
-We can then customise our Traefik configuration by creating a file called `traefik-config.yaml` with the following content:
-```yaml
-apiVersion: helm.cattle.io/v1
-kind: HelmChartConfig
-metadata:
-  name: traefik
-  namespace: kube-system
-spec:
-  valuesContent: |-
-    image:
-      name: traefik
-      tag: 2.10.5
-    forwardedHeaders:
-      enabled: true
-      trustedIPs:
-        - 10.0.0.0/8
-    ssl:
-      enabled: true
-      permanentRedirect: false
-```
-When using version 2.10 of `traefik`, we need to manually add the missing CRDS:
-```bash
-kubectl apply -f https://raw.githubusercontent.com/traefik/traefik/v2.10/docs/content/reference/dynamic-configuration/kubernetes-crd-definition-v1.yml
-```
-We then need to update the api groups in the `traefik-kube-system` cluster role with `traefik.io`:
-```bash
-kubectl edit clusterrole traefik-kube-system
-```
-![traefik-kube-system Cluster Role](/public/assets/images/traefik-kube-system-cluster-role.png "traefik-kube-system Cluster Role")   
-
-All api groups in Traefik resources need to be changed from `traefik.containo.us/v1alpha1` to `traefik.io/v1alpha1`. This is complex and inconvenient. We might reconsider using Traefik as an ingress controller in favour of NGINX.
