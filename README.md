@@ -205,7 +205,6 @@ When we install `gen3`, the `revproxy-service` will be the ingress of the Gen3 s
 
 **NOTE:** The test `my-deployment` resources can be deleted after confirming that the ingress controller is working as desired:
 ```bash
-kubectl delete 
 kubectl delete deployment my-deployment
 kubectl delete service my-deployment
 kubectl delete ingress my-deployment-ingress
@@ -304,4 +303,42 @@ Traceback (most recent call last):
     self._sslobj.do_handshake()
 ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:852)
 ```
-There is an SSL or TLS issue with some of the deployments. This could be due to not having an external load balancer configured for the K3s cluster. When using a cloud provider like AWS, the Amazon Load Balancer is automatically configured to be used by the cluster. For on-prem solutions, an external load balancer needs to be manually configured.
+There is an SSL or TLS issue with some of the deployments. We can try creating an `cloud08-certs` Kubernetes secrets which contains some of the certificates that exist on the physical host. These certificates can be found in the `/etc/ssl/certs` directory.   
+
+We can try creating new certificates for the host (`cloud08`) using `openssl`:
+```bash
+mkdir -p cloud08_certs
+
+openssl req \
+-new \
+-newkey rsa:2048 \
+-x509 \
+-sha256 \
+-days 365 \
+-nodes \
+-subj "/O=cloud08/CN=cloud08.core.wits.ac.za" \
+-keyout cloud08_certs/cloud08.key \
+-out cloud08_certs/cloud08.crt
+```
+These certificates can be added to a Kubernetes secret as follows:
+```bash
+kubectl create secret tls cloud08-tls-secret --key cloud08_certs/cloud08.key --cert cloud08_certs/cloud08.crt
+```
+We can also create a secret that uses the pre-existing certificates on the node which reside in the `/etc/ssl/certs/` directory:
+```bash
+kubectl create secret tls cloud08-certs --key /etc/ssl/certs/ca-certificates.key --cert /etc/ssl/certs/ca-certificates.crt
+```
+Unfortunately, there doesn't seem to be a `.key` file for these old certificates. Without the `.key` file, we cannot use the certificate.   
+
+The NGINX ingress controller should be edited to include this secret by adding the following to the `revproxy-dev` manifest under the `spec` section:
+```bash
+  tls:
+  - hosts:
+    - cloud08.core.wits.ac.za
+    secretName: gen3-certs
+  - hosts:
+    - cloud08.core.wits.ac.za
+    secretName: cloud08-tls-secret
+```
+
+Another reason for the problems we are facing could be due to not having an external load balancer configured for the K3s cluster. When using a cloud provider like AWS, the Amazon Load Balancer (ALB) is automatically configured to be used by the cluster. For on-prem solutions, an external load balancer needs to be manually configured. 
