@@ -69,8 +69,8 @@ aws-es-proxy:
     tag: "master"
   esEndpoint: test.us-east-1.es.amazonaws.com
   secrets:
-    awsAccessKeyId: "AKIA5VDDU6BP66WC3OWD"
-    awsSecretAccessKey: "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"
+    awsAccessKeyId: ""
+    awsSecretAccessKey: ""
 
 fence:
   enabled: true
@@ -108,9 +108,9 @@ fence:
     # -- (map) Secret information
     secrets:
       # -- (str) AWS access key ID for usersync S3 bucket
-      awsAccessKeyId: "AKIA5VDDU6BP66WC3OWD"
+      awsAccessKeyId: ""
       # -- (str) AWS secret access key for usersync S3 bucket
-      awsSecretAccessKey: "EjrOGROOb2SWJdTRGw9PmuxhH5RXjP43uf2rmjhb"
+      awsSecretAccessKey: ""
     # -- (string) The cron schedule expression to use in the usersync cronjob. Runs every 30 minutes by default.
     schedule: "*/30 * * * *"
     # -- (string) To set a custom image for pulling the user.yaml file from S3. Default is the Gen3 Awshelper image.
