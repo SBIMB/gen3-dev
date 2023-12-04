@@ -1,3 +1,4 @@
 .DS_Store
 strict-local.sh
 hosts.txt
+resolv.conf
