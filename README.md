@@ -303,9 +303,7 @@ Traceback (most recent call last):
     self._sslobj.do_handshake()
 ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:852)
 ```
-There is an SSL or TLS issue with some of the deployments. We can try creating an `cloud08-certs` Kubernetes secrets which contains some of the certificates that exist on the physical host. These certificates can be found in the `/etc/ssl/certs` directory.   
-
-We can try creating new certificates for the host (`cloud08`) using `openssl`:
+There is an SSL or TLS issue with some of the deployments. We can try creating new certificates for the host (`cloud08`) using `openssl`:
 ```bash
 mkdir -p cloud08_certs
 
@@ -330,6 +328,28 @@ kubectl create secret tls cloud08-certs --key /etc/ssl/certs/ca-certificates.key
 ```
 Unfortunately, there doesn't seem to be a `.key` file for these old certificates. Without the `.key` file, we cannot use the certificate.   
 
+We can also try creating new certificates for node `pc78`, since there appears to be some mix up regarding the DNS involving the ip addresses of the `cloud08` node and the `pc78` node. Perhaps they are the same nodes with two different names.    
+![Hostname and IP Address of Node](/public/assets/images/nslookup-confusion.png "Hostname and IP Address of Node")   
+
+We'll do the following:
+```bash
+mkdir -p pc78_certs
+
+openssl req \
+-new \
+-newkey rsa:2048 \
+-x509 \
+-sha256 \
+-days 365 \
+-nodes \
+-subj "/O=pc78/CN=pc78.core.wits.ac.za" \
+-keyout pc78_certs/pc78.key \
+-out pc78_certs/pc78.crt
+```
+We'll then create the corresponding secret which will have these newly created certificates:
+```bash
+kubectl create secret tls pc78-tls-secret --key pc78_certs/pc78.key --cert pc78_certs/pc78.crt
+```
 The NGINX ingress controller should be edited to include this secret by adding the following to the `revproxy-dev` manifest under the `spec` section:
 ```bash
   tls:
@@ -339,6 +359,12 @@ The NGINX ingress controller should be edited to include this secret by adding t
   - hosts:
     - cloud08.core.wits.ac.za
     secretName: cloud08-tls-secret
+  - hosts:
+    - pc78.core.wits.ac.za
+    secretName: gen3-certs
+  - hosts:
+    - pc78.core.wits.ac.za
+    secretName: pc78-tls-secret
 ```
 
 Another reason for the problems we are facing could be due to not having an external load balancer configured for the K3s cluster. When using a cloud provider like AWS, the Amazon Load Balancer (ALB) is automatically configured to be used by the cluster. For on-prem solutions, an external load balancer needs to be manually configured. 

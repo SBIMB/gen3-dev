@@ -5,4 +5,4 @@ metadata:
   namespace: metallb
 spec:
   addresses:
-  - 146.141.240.78/32
+  - 146.141.240.78
