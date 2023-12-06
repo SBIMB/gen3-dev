@@ -65,11 +65,11 @@ Using Helm, we begin with:
 ```bash
 helm repo add stable https://charts.helm.sh/stable
 ```
-In the past, `metallb` used to be configured using config maps because that’s traditionally where configs were placed. However, now it uses custom resources (CRs). We'll create a namespace called `metallb` and then perform a Helm deployment for all the `metallb` resources:
+In the past, `metallb` used to be configured using config maps because that’s traditionally where configs were placed. However, now it uses custom resources (CRs). We'll create a namespace called `metallb-system` and then perform a Helm deployment for all the `metallb` resources:
 ```bash
-kubectl create ns metallb
+kubectl create ns metallb-system
 helm repo add metallb https://metallb.github.io/metallb
-helm install metallb metallb/metallb --namespace metallb
+helm install metallb metallb/metallb --namespace metallb-system
 ```
 Now we need to create two additional resources, an address pool and a layer two advertisement, which instructs `metallb` to use the address pool. Here are the manifests of the two resources (saved inside the `metallb` directory):
 **IPAddressPool.yaml**   
@@ -96,12 +96,12 @@ spec:
 ```
 To create these resources, we need to run the `kubectl apply -f` command:
 ```bash
-kubectl -n metallb apply -f metallb/IPAddressPool.yaml
-kubectl -n metallb apply -f metallb/L2Advertisement.yaml
+kubectl -n metallb-system apply -f metallb/IPAddressPool.yaml
+kubectl -n metallb-system apply -f metallb/L2Advertisement.yaml
 ```
 To see if the resources have been created, we can run:
 ```bash
-kubectl get pods -n metallb
+kubectl get pods -n metallb-system
 ```
 and should get an output that looks similar to:   
 
@@ -117,6 +117,12 @@ helm upgrade --install ingress-nginx ingress-nginx \
 --repo https://kubernetes.github.io/ingress-nginx \
 --namespace ingress-nginx --create-namespace
 ```
+Instead of using Helm, the NGINX ingress controller can be created directly from a manifest:
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.7.1/deploy/static/provider/baremetal/deploy.yaml
+```
+(This manifest file has been copied and saved to this repository, `ingress-nginx-controller/ingress-nginx-controller-v1.7.1.yaml`).   
+
 After a short while, we can run the following command to see if the pods are up and running:
 ```bash
 kubectl get pods --namespace=ingress-nginx

@@ -2,7 +2,7 @@ apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   name: k3s-cloud08-pool
-  namespace: metallb
+  namespace: metallb-system
 spec:
   addresses:
-  - 146.141.240.78
+  - 146.141.240.78/32
