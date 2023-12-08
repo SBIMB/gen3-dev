@@ -262,7 +262,7 @@ nameserver 8.8.8.8
 nameserver 8.8.4.4
 nameserver 127.0.0.53
 ```
-The `/etc/resolv.conf` file needs to be symlinked to the `/run/systemd/resolve/resolv.conf` file, not the stubbed version.   
+The `/etc/resolv.conf` file is symlinked to the `/run/systemd/resolve/stub-resolv.conf` file.   
 
 The command `nslookup 146.141.8.16` gives the following result:
 ```bash
@@ -272,7 +272,7 @@ The command `nslookup 146.141.15.210` gives the following result:
 ```bash
 210.15.141.146.in-addr.arpa	name = mail1.wits.ac.za.
 ```
-We need to modify the `resolv.conf` file by removing the top two nameserver ip addresses, since they are not allowing us to access the public internet. We should use `8.8.8.8`, which is the primary DNS server for Google DNS.   
+We need to modify the `resolv.conf` file by removing the top two nameserver ip addresses, since they are not allowing us to access the public internet. We should use `1.1.1.1` and `8.8.8.8`, which are the primary DNS servers for Cloudflare and Google DNS, respectively.    
 
 To change the DNS server, we need to configure the `/etc/network/interfaces` file. The command `cat /etc/network/interfaces` displays the following:
 ```bash
@@ -307,11 +307,7 @@ iface br0 inet static
       bridge_maxwait 0
       dns-nameservers 146.141.8.16 146.141.15.210 8.8.8.8
 ```
-We can see that the `dns-nameservers` contains those two ip addresses that are giving us trouble. We should remove those and end up with 
-```bash
-dns-nameservers 8.8.8.8 8.8.4.4
-```
-First, we should ensure that the `resolvconf` service is enabled and running with:
+We should ensure that the `resolvconf` service is enabled and running with:
 ```bash
 sudo systemctl status resolvconf.service
 ```
@@ -324,7 +320,14 @@ Now the `/etc/resolvconf/resolv.conf.d/head` file can be edited with
 ```bash
 sudo vim /etc/resolvconf/resolv.conf.d/head
 ```
-by removing the two unwanted ip addresses and replacing them with `8.8.8.8` and `8.8.4.4`. These updated scripts can be forced to run with
+Let us modify the `/etc/resolvconf/resolv.conf.d/head` file as follows:
+```bash
+nameserver 146.141.8.16
+nameserver 146.141.15.210
+nameserver 8.8.8.8
+search core.wits.ac.za
+```
+The updated scripts can be forced to run with
 ```bash
 sudo resolvconf --enable-updates
 sudo resolvconf -u
@@ -334,6 +337,43 @@ This should change the DNS settings of the host machine. The following commands 
 sudo systemctl restart resolvconf.service
 sudo systemctl restart systemd-resolved.service
 ```
+
+Running the command `ip r` returns the routes, which are
+```bash
+default via 146.141.240.10 dev br0 onlink
+10.42.0.0/24 dev cni0 proto kernel scope link src 10.42.0.1
+146.141.240.0/24 dev br0 proto kernel scope link src 146.141.240.78
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown
+192.168.123.0/24 dev virbr0 proto kernel scope link src 192.168.123.1 linkdown
+```
+
+If problems persist, perhaps the solution lies in running:
+```bash
+sudo dpkg-reconfigure resolvconf
+```
+and then rebooting the system with `sudo reboot`.   
+
+A custom `resolv.conf` file named `/etc/k3s-resolv.conf` needs to be created that will contain the upstream DNS server for any external domains. The contents of this file should be identical to that of the host's `/etc/resolv.conf` file, with the addition of the router's IP address, which is usually `192.168.1.1`. So in our case, it would look like this:
+```bash
+nameserver 192.168.1.1
+nameserver 146.141.8.16
+nameserver 146.141.15.210
+nameserver 8.8.8.8
+search core.wits.ac.za
+```
+We need to update the `/etc/rancher/k3s/config.yaml` file by appending the kubelet arg, i.e. 
+```bash
+echo 'kubelet-arg:' | sudo tee -a /etc/rancher/k3s/config.yaml
+echo '- "resolv-conf=/etc/k3s-resolv.conf"' | sudo tee -a /etc/rancher/k3s/config.yaml
+```
+This is done so that K3s will automatically read the config at startup. A K3s stop-and-start will be needed for the changes to be reflected, so the following commands should be run:
+```bash
+sudo systemctl stop k3s
+sleep 10
+sudo systemctl start k3s
+systemctl status k3s
+```
+The `coredns` pod in the `kube-system` namespace should be deleted (it will be recreated immediately and should read the updated configuration).
 
 **Disabling IPv6 via sysctl settings**
 If either of the following commands return a result,
