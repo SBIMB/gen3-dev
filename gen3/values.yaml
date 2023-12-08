@@ -50,8 +50,8 @@ aws-es-proxy:
     tag: "master"
   esEndpoint: test.us-east-1.es.amazonaws.com
   secrets:
-    awsAccessKeyId: "AKIA5VDDU6BP66WC3OWD"
-    awsSecretAccessKey: "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"
+    awsAccessKeyId: ""
+    awsSecretAccessKey: ""
 
 fence:
   enabled: true
