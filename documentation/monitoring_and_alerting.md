@@ -5,9 +5,9 @@ To create a namespace for Grafana, run the following command:
 ```bash
 kubectl create namespace gen3-grafana
 ```
-We'll create a `grafana.yaml` file which will contain the blueprint for a persistent volume claim (pvc), a service of type loadbalancer, and a deployment. This file can be found in the `gen3` directory of this repo. To create these resources, we need to apply the manifest as follows:
+We'll create a `grafana.yaml` file which will contain the blueprint for a persistent volume claim (pvc), a service of type loadbalancer, and a deployment. This file can be found in the `grafana` directory of this repo. To create these resources, we need to apply the manifest as follows:
 ```bash
-kubectl apply -f gen3/grafana.yaml --namespace=gen3-grafana
+kubectl apply -f grafana/grafana.yaml --namespace=gen3-grafana
 ```
 To get all information about the Grafana deplyment, run:
 ```bash

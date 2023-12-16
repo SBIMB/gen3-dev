@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: gen3-volume-pod
+  namespace: default
+spec:
+  containers:
+  - name: gen3-volume-pod
+    image: nginx:stable-alpine
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: gen3-volume
+      mountPath: /data
+    ports:
+    - containerPort: 80
+  volumes:
+  - name: gen3-volume
+    persistentVolumeClaim:
+      claimName: longhorn-gen3-pvc
