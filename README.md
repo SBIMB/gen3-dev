@@ -44,6 +44,22 @@ If something is not quite right and there is a desire to re-install K3s with som
 ```
 In such a case, remember to delete the `.kube` directory so that there aren't any certificate issues with a fresh re-install.   
 
+To add another node to the cluster, two pieces of information are required:   
+1. K3S_URL=https://ip-address-of-master-node:6443   
+2. K3S_TOKEN="K10b63f77faa4043254ce5acd735f461514c9265b0c40e9fb32e84dc19cbdefdfa3::server:6f6edd5c568c0d8c6d18a19682d22d08" (this can be found in the `/var/lib/rancher/k3s/server` directory. Simply run `sudo cat /var/lib/rancher/k3s/server/node-token` to see the value).   
+Once these values are retrieved, the new node can be added to the cluster by running:
+```bash
+curl -sfL https://get.k3s.io | K3S_URL=https://146.141.240.78:6443 K3S_TOKEN="K10b63f77faa4043254ce5acd735f461514c9265b0c40e9fb32e84dc19cbdefdfa3::server:6f6edd5c568c0d8c6d18a19682d22d08" INSTALL_K3S_EXEC="--disable servicelb --disable traefik" sh -s - --write-kubeconfig-mode 644
+```
+This newly added node needs to be started up as an agent:
+```bash
+sudo k3s agent --server ${K3S_URL} --token ${K3S_TOKEN}
+```
+On the master node, we can see all the nodes by running:
+```bash
+kubectl get nodes -o wide
+```
+
 ### Helm
 [Helm](https://helm.sh/) is a package manager for Kubernetes that allows for the installation or deployment of applications onto a Kubernetes cluster. We can install it as follows:
 ```bash
