@@ -33,4 +33,17 @@ beta.kubernetes.io/os=linux
 kubernetes.io/arch=amd64
 kubernetes.io/hostname=<node_name>
 ```
-Labeling nodes is particularly useful, especially when there is a need to have certain workloads running on specific nodes. For example, if there are important production workloads, we may label a particular node with a key-value pair like `workload=prod`. Any pod that contains a label or annotation that includes `workload=prod` will be scheduled to run on the node with that label.
+Labeling nodes is particularly useful, especially when there is a need to have certain workloads running on specific nodes. For example, if there are important production workloads, we may label a particular node with a key-value pair like `workload=prod`. Any pod that contains a label or annotation that includes `workload=prod` will be scheduled to run on the node with that label. As a start, we can begin by giving the newly added worker node a label of `role=worker` as follows:
+```bash
+kubectl label node cloud05 node-role.kubernetes.io/worker=worker
+```
+We can see that the labelling has worked by running:
+```bash
+kubectl get nodes
+```
+Where the output is:   
+
+| NAME    | STATUS | ROLES                | AGE |  VERSION     |
+| ------- | ------ | -------------------- | --- | ------------ |
+| cloud08 | Ready  | control-plane,master | 14d | v1.27.7+k3s2 |
+| cloud05 | Ready  | worker               | 40m | v1.28.4+k3s2 |
