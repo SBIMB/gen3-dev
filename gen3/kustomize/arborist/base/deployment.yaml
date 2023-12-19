@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: gen3-dev
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2023-12-11T21:35:12Z"
+  generation: 1
+  labels:
+    app: arborist
+    app.kubernetes.io/instance: gen3-dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: arborist
+    app.kubernetes.io/part-of: Authentication
+    app.kubernetes.io/version: 0.1.9
+    critical-service: "true"
+    release: production
+  name: arborist-deployment
+  namespace: default
+  resourceVersion: "258010"
+  uid: a9c68df4-fbe1-4283-906e-b3f408e2e074
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: arborist
+      app.kubernetes.io/instance: gen3-dev
+      app.kubernetes.io/name: arborist
+      release: production
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: arborist
+        app.kubernetes.io/instance: gen3-dev
+        app.kubernetes.io/name: arborist
+        release: production
+    spec:
+      containers:
+      - args:
+        - -c
+        - |
+          set -e
+          # set env vars
+          export PGSSLMODE="disable"
+
+          # bring the database schema up to the latest version
+          /go/src/github.com/uc-cdis/arborist/migrations/latest
+
+          # run arborist
+          /go/src/github.com/uc-cdis/arborist/bin/arborist
+        command:
+        - sh
+        env:
+        - name: JWKS_ENDPOINT
+          value: http://fence-service/.well-known/jwks
+        - name: PGPASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: arborist-dbcreds
+              optional: false
+        - name: PGUSER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: arborist-dbcreds
+              optional: false
+        - name: PGDATABASE
+          valueFrom:
+            secretKeyRef:
+              key: database
+              name: arborist-dbcreds
+              optional: false
+        - name: PGHOST
+          valueFrom:
+            secretKeyRef:
+              key: host
+              name: arborist-dbcreds
+              optional: false
+        - name: PGPORT
+          valueFrom:
+            secretKeyRef:
+              key: port
+              name: arborist-dbcreds
+              optional: false
+        - name: PGSSLMODE
+          value: disable
+        - name: DBREADY
+          valueFrom:
+            secretKeyRef:
+              key: dbcreated
+              name: arborist-dbcreds
+              optional: false
+        image: quay.io/cdis/arborist:master
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 10
+        name: arborist
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: "1"
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 12Mi
+        securityContext: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: gen3-dev-arborist
+      serviceAccountName: gen3-dev-arborist
+      terminationGracePeriodSeconds: 30

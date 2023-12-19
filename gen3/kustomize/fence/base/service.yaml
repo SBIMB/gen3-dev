@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: gen3-dev
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2023-12-11T21:35:11Z"
+  labels:
+    app: fence
+    app.kubernetes.io/instance: gen3-dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: fence
+    app.kubernetes.io/part-of: Authentication
+    app.kubernetes.io/version: 0.1.14
+    critical-service: "true"
+    release: production
+  name: fence-service
+  namespace: default
+  resourceVersion: "257202"
+  uid: 87fa0da3-354b-4d3e-835c-f255c095c05d
+spec:
+  clusterIP: 10.43.223.192
+  clusterIPs:
+  - 10.43.223.192
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: http
+  selector:
+    app: fence
+    app.kubernetes.io/instance: gen3-dev
+    app.kubernetes.io/name: fence
+    release: production
+  sessionAffinity: None
+  type: ClusterIP

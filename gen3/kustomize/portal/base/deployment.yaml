@@ -1,0 +1,203 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: gen3-dev
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2023-12-11T21:35:12Z"
+  generation: 1
+  labels:
+    app: portal
+    app.kubernetes.io/instance: gen3-dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: portal
+    app.kubernetes.io/part-of: Front-End
+    app.kubernetes.io/version: 0.1.8
+    critical-service: "true"
+    release: production
+  name: portal-deployment
+  namespace: default
+  resourceVersion: "258237"
+  uid: 9771fcc8-44f5-4e1b-a3a0-7ac5a7536339
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: portal
+      app.kubernetes.io/instance: gen3-dev
+      app.kubernetes.io/name: portal
+      release: production
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: portal
+        app.kubernetes.io/instance: gen3-dev
+        app.kubernetes.io/name: portal
+        public: "yes"
+        release: production
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - portal
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: HOSTNAME
+          value: revproxy-service
+        - name: NPM_CONFIG_UPDATE_NOTIFIER
+          value: "false"
+        - name: NODE_ENV
+          value: dev
+        - name: APP
+          value: gitops
+        - name: GEN3_BUNDLE
+        - name: LOGOUT_INACTIVE_USERS
+          valueFrom:
+            configMapKeyRef:
+              key: logout_inactive_users
+              name: manifest-global
+              optional: true
+        - name: WORKSPACE_TIMEOUT_IN_MINUTES
+          valueFrom:
+            configMapKeyRef:
+              key: workspace_timeout_in_minutes
+              name: manifest-global
+              optional: true
+        - name: TIER_ACCESS_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              key: tier_access_level
+              name: manifest-global
+              optional: true
+        - name: TIER_ACCESS_LIMIT
+          valueFrom:
+            configMapKeyRef:
+              key: tier_access_limit
+              name: manifest-global
+              optional: true
+        - name: FENCE_URL
+          valueFrom:
+            configMapKeyRef:
+              key: fence_url
+              name: manifest-global
+              optional: true
+        - name: INDEXD_URL
+          valueFrom:
+            configMapKeyRef:
+              key: indexd_url
+              name: manifest-global
+              optional: true
+        - name: WORKSPACE_URL
+          valueFrom:
+            configMapKeyRef:
+              key: workspace_url
+              name: manifest-global
+              optional: true
+        - name: MANIFEST_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              key: manifest_service_url
+              name: manifest-global
+              optional: true
+        - name: WTS_URL
+          valueFrom:
+            configMapKeyRef:
+              key: wts_url
+              name: manifest-global
+              optional: true
+        - name: PRIVACY_POLICY_URL
+          valueFrom:
+            configMapKeyRef:
+              key: privacy_policy_url
+              name: manifest-global
+              optional: true
+        - name: MAPBOX_API_TOKEN
+          valueFrom:
+            configMapKeyRef:
+              key: mapbox_token
+              name: global
+              optional: true
+        image: quay.io/cdis/data-portal:master
+        imagePullPolicy: IfNotPresent
+        name: portal
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
+        resources:
+          limits:
+            memory: 4Gi
+          requests:
+            cpu: "2"
+            memory: 4Gi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data-portal/data/config/gitops.json
+          name: config-volume
+          subPath: gitops.json
+        - mountPath: /data-portal/custom/logo/gitops-logo.png
+          name: config-volume
+          subPath: gitops-logo.png
+        - mountPath: /data-portal/custom/createdby/gitops.png
+          name: config-volume
+          subPath: gitops-createdby.png
+        - mountPath: /data-portal/custom/favicon/gitops-favicon.ico
+          name: config-volume
+          subPath: gitops-favicon.ico
+        - mountPath: /data-portal/custom/css/gitops.css
+          name: config-volume
+          subPath: gitops.css
+        - mountPath: /data-portal/custom/sponsors/gitops-sponsors
+          name: sponsor-img-volume
+        - mountPath: /data-portal/custom/privacy_policy.md
+          name: privacy-policy
+          readOnly: true
+          subPath: privacy_policy.md
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: config-volume
+        secret:
+          defaultMode: 420
+          secretName: portal-config
+      - name: sponsor-img-volume
+        secret:
+          defaultMode: 420
+          secretName: portal-sponsor-config
+      - configMap:
+          defaultMode: 420
+          name: privacy-policy
+        name: privacy-policy

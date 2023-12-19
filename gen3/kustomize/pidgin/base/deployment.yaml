@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    meta.helm.sh/release-name: gen3-dev
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2023-12-11T21:35:12Z"
+  generation: 1
+  labels:
+    app: pidgin
+    app.kubernetes.io/instance: gen3-dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: pidgin
+    app.kubernetes.io/part-of: Peregrine
+    app.kubernetes.io/version: 0.1.8
+    critical-service: "false"
+    release: production
+  name: pidgin-deployment
+  namespace: default
+  resourceVersion: "258039"
+  uid: c0596ab9-ff28-4570-88e7-fd642b903e66
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: pidgin
+      app.kubernetes.io/instance: gen3-dev
+      app.kubernetes.io/name: pidgin
+      release: production
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: pidgin
+        app.kubernetes.io/instance: gen3-dev
+        app.kubernetes.io/name: pidgin
+        netnolimit: "yes"
+        public: "yes"
+        release: production
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - pidgin
+              topologyKey: kubernetes.io/hostname
+            weight: 100
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: GEN3_DEBUG
+          value: "False"
+        image: quay.io/cdis/pidgin:master
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /_status
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 30
+        name: pidgin
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        - containerPort: 443
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /_status
+            port: 80
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
