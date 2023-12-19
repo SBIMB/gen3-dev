@@ -1,0 +1,14 @@
+apiVersion: v2
+appVersion: master
+dependencies:
+- name: common
+  repository: file://../common
+  version: 0.1.8
+- condition: postgres.separate
+  name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 11.9.13
+description: A Helm chart for gen3 indexd
+name: indexd
+type: application
+version: 0.1.11

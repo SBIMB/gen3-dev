@@ -1,0 +1,10 @@
+apiVersion: v2
+appVersion: master
+dependencies:
+- name: common
+  repository: file://../common
+  version: 0.1.8
+description: A Helm chart for gen3 Guppy Service
+name: guppy
+type: application
+version: 0.1.9
