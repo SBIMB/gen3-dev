@@ -1,4 +1,4 @@
-### Running a PostgreSQL Database inside a Docker Container (Optional)
+## Running a PostgreSQL Database inside a Docker Container (Optional)
 A postgreSQL database can be created to run inside a Docker container. This should not be in the Kubernetes cluster. This is not necessary for testing, but would be required if a persistent database is required. The following commands can be copied into a script called `init-db.sh` for convenience, or they could be run independently, but sequentially, as follows:
 ```bash
 echo "Start postgres docker container"

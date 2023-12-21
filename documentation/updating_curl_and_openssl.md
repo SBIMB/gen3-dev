@@ -1,4 +1,4 @@
-### Updating cURL and OpenSSL
+## Updating cURL and OpenSSL
 To update `curl` to version 8.4.0, download the `.zip` file using the following command:
 ```bash
 wget https://curl.se/download/curl-8.4.0.zip

@@ -1,4 +1,4 @@
-### Grafana OSS in Kubernetes (Optional)   
+## Grafana OSS in Kubernetes (Optional)   
 Grafana open source software (OSS) allows for the querying, visualising, alerting on, and exploring of metrics, logs, and traces wherever they are stored. Graphs and visualisations can be created from time-series database (TSDB) data with the tools that are provided by Grafana OSS. We'll be using the [Grafana documentation](https://grafana.com/docs/grafana/latest/setup-grafana/installation/kubernetes/) to guide us in installing Grafana in our k8s cluster.   
 
 To create a namespace for Grafana, run the following command:

@@ -1,4 +1,4 @@
-### Upgrading Traefik Ingress to v2.10
+## Upgrading Traefik Ingress to v2.10
 From the root, we can navigate to `/var/lib/rancher/k3s/server/manifests` and see the contents of the `traefik.yaml` file, which should **never** be edited manually:
 ```bash
 cat traefik.yaml

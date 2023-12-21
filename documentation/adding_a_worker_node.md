@@ -1,4 +1,4 @@
-### Adding a Worker Node to the K3s Cluster
+## Adding a Worker Node to the K3s Cluster
 
 To add another node to the cluster, two pieces of information are required:   
 1. K3S_URL=https://ip-address-of-master-node:6443   

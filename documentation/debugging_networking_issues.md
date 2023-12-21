@@ -1,4 +1,4 @@
-### Troubleshooting Networking Issues
+## Troubleshooting Networking Issues
 Some of the Gen3 deployments are not in a READY state.   
 
 ![Failed deployments](../public/assets/images/gen3-deployments-incomplete.png "Failed deployments")     

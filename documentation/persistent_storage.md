@@ -1,4 +1,4 @@
-### Longhorn
+## Longhorn
 [Longhorn](https://longhorn.io/docs/1.5.1/) is an open-source distributed block storage system for Kubernetes, and is supported by K3s. To install Longhorn, we apply the `longhorn.yaml`:
 
 ```bash
