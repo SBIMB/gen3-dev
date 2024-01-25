@@ -277,4 +277,43 @@ kubectl get deployments
 ```    
 ![Gen3 services deployed with NGINX](public/assets/images/gen3-deployments.png "Gen3 services deployed with NGINX")   
 
+Information about the Gen3 helm release can be found with the command:
+```bash
+helm list
+```
+and we should see a table that looks similar to this:
+| NAME          | NAMESPACE | REVISION  | UPDATED                                  | STATUS   | CHART       | APP VERSION |
+| ------------- | --------- | --------- | ---------------------------------------- | -------- | ----------- | ----------- |
+| gen3-dev      | default   | 1         | 2024-01-16 13:35:01.712355152 +0200 SAST | deployed | gen3-0.1.21 | master      |
 
+To verify that the correct custom values are being used, the following command can be run:
+```bash
+helm get values <name-of-release>
+```
+In our case, the name of the release is `gen3-dev`. The output will be a reproduction of the `values.yaml` file with the first line being **USER-SUPPLIED VALUES:**. There may exist the requirement or desire to edit values in the `values.yaml` _without_ upgrading the version of the release. In that case, the version of the release needs to be specified as well as the name of the file containing the updated values:
+```bash
+helm upgrade -f updated-values.yaml gen3-dev gen3/gen3 --version 0.1.21
+```
+Alternatively, the following commands could be used if the values from the previous release need to be used again (this is because, by default, the `helm upgrade` command resets the values to those baked into the chart):
+```bash
+helm upgrade --reuse-values --set key=oldValue --set key=newValue gen3-dev gen3/gen3
+```
+or 
+```bash
+helm upgrade --reuse-values --set key1=newValue1,key2=newValue2 gen3-dev gen3/gen3
+```
+
+#### Mocking Google Authentication
+For testing purposes and for a quick setup of the Gen3 ecosystem, the Google authentication process can be mocked. The `fence` service is responsible for authenticating a user, so the `fence` config of the value file needs to be configured as follows:
+```yaml
+fence:
+  enabled: true
+  FENCE_CONFIG:
+    MOCK_GOOGLE_AUTH: true
+    OPENID_CONNECT:
+      google:
+        mock_default_user: "test@example.com"
+```
+If all the Gen3 services are up and running, the portal can be accessed in the browser by making use of the machine's IP address and the node port of the `revproxy-service` (since the `revproxy-service` is a service of type **NodePort**), e.g.   
+
+![User Endpoint for Mock Google Authentication](public/assets/images/user-endpoint-for-mock-login.png "User Endpoint for Mock Google Authentication")
