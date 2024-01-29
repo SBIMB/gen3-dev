@@ -290,13 +290,9 @@ To verify that the correct custom values are being used, the following command c
 ```bash
 helm get values <name-of-release>
 ```
-In our case, the name of the release is `gen3-dev`. The output will be a reproduction of the `values.yaml` file with the first line being **USER-SUPPLIED VALUES:**. There may exist the requirement or desire to edit values in the `values.yaml` _without_ upgrading the version of the release. In that case, the version of the release needs to be specified as well as the name of the file containing the updated values:
+In our case, the name of the release is `gen3-dev`. The output will be a reproduction of the `values.yaml` file with the first line being **USER-SUPPLIED VALUES:**. There may exist the requirement to edit values in the `values.yaml` _without_ upgrading the version of the release. In that case, the following commands could be used if the values from the previous release need to be used again (this is because, by default, the `helm upgrade` command resets the values to those baked into the chart):
 ```bash
-helm upgrade -f updated-values.yaml gen3-dev gen3/gen3 --version 0.1.21
-```
-Alternatively, the following commands could be used if the values from the previous release need to be used again (this is because, by default, the `helm upgrade` command resets the values to those baked into the chart):
-```bash
-helm upgrade --reuse-values --set key=oldValue --set key=newValue gen3-dev gen3/gen3
+helm upgrade --reuse-values -f gen3/updated-values.yaml gen3-dev gen3/gen3
 ```
 or 
 ```bash
@@ -304,16 +300,33 @@ helm upgrade --reuse-values --set key1=newValue1,key2=newValue2 gen3-dev gen3/ge
 ```
 
 #### Mocking Google Authentication
-For testing purposes and for a quick setup of the Gen3 ecosystem, the Google authentication process can be mocked. The `fence` service is responsible for authenticating a user, so the `fence` config of the value file needs to be configured as follows:
+For testing purposes and for a quick setup of the Gen3 ecosystem, the authentication process can be mocked. The `fence` service is responsible for authenticating a user, so the `fence` config of the value file needs to be configured as follows:
 ```yaml
 fence:
   enabled: true
   FENCE_CONFIG:
-    MOCK_GOOGLE_AUTH: true
-    OPENID_CONNECT:
-      google:
-        mock_default_user: "test@example.com"
+    MOCK_AUTH: true
 ```
-If all the Gen3 services are up and running, the portal can be accessed in the browser by making use of the machine's IP address and the node port of the `revproxy-service` (since the `revproxy-service` is a service of type **NodePort**), e.g.   
+This will automatically login a user with username "test". If all the Gen3 services are up and running, the portal can be accessed in the browser by making use of the machine's IP address and the node port of the `revproxy-service` (since the `revproxy-service` is a service of type **NodePort**), e.g.   
 
-![User Endpoint for Mock Google Authentication](public/assets/images/user-endpoint-for-mock-login.png "User Endpoint for Mock Google Authentication")
+![User Endpoint for Mock Authentication](public/assets/images/user-endpoint-for-mock-login.png "User Endpoint for Mock Authentication")    
+
+To upload a file to a custom AWS S3 bucket, the bucket name needs to be provided in the `fence` config of the `values.yaml` file:
+```yaml
+fence:
+  enabled: true
+  FENCE_CONFIG:
+    AWS_CREDENTIALS:
+      "gen3-user":
+        aws_access_key_id: "accessKeyIdForGen3User"
+        aws_secret_access_key: "secretAccessKeyForGen3User"
+    S3_BUCKETS:
+      # Name of the actual s3 bucket
+      gen3-bucket:
+        cred: "gen3-user"
+        endpoint_url: "s3.us-east-1.amazonaws.com"
+        region: us-east-1
+    # This is important for data upload.
+    DATA_UPLOAD_BUCKET: "gen3-bucket"
+```
+The other `fence` endpoints can be found over [here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/uc-cdis/fence/master/openapis/swagger.yaml). 
