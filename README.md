@@ -277,6 +277,12 @@ kubectl get deployments
 ```    
 ![Gen3 services deployed with NGINX](public/assets/images/gen3-deployments.png "Gen3 services deployed with NGINX")   
 
+The `portal-deployment` is normally the last deployment to be ready. In particular, it is dependent on both the `peregrine-deployment` and the `sheepdog-deployment`. It may struggle (by constantly restarting) to run while waiting for the other deployments to be ready. If that happens, then the following command should be run once the `peregrine-deployment` and the `sheepdog-deployment` are up and running:
+```bash
+kubectl rollout restart deployment portal-deployment
+```
+This command restarts the deployment. Alternatively, the `portal-deployment` pod can simply be deleted. The replicaset will ensure that another pod is spun up immediately.   
+
 Information about the Gen3 helm release can be found with the command:
 ```bash
 helm list
@@ -329,4 +335,9 @@ fence:
     # This is important for data upload.
     DATA_UPLOAD_BUCKET: "gen3-bucket"
 ```
-The other `fence` endpoints can be found over [here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/uc-cdis/fence/master/openapis/swagger.yaml). 
+The other `fence` endpoints can be found over [here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/uc-cdis/fence/master/openapis/swagger.yaml). For example the POST method for uploading a file to a bucket can be used with `curl` as follows (an open-source tool like [Postman](https://www.postman.com/) can be used if it's more convenient):
+```bash
+curl -X POST http://<ip-address>:<nodePort>/data/upload
+   -H "Content-Type: application/json"
+   -d '{"file_name": "my_file.bam", "bucket": "gen3-bucket", "expires_in": 1200, "authz": ["/programs/A"]}' 
+```
