@@ -271,6 +271,11 @@ The output should look similar to this:
 | ------------- | ------- | ----------------------- | -------------- | ------- | --- |
 | revproxy-dev  | nginx   | cloud08.core.wits.ac.za | 146.141.240.78 | 80, 443 | 10m | 
 
+Additional changes need to be made to the ingress manifest. Since an external service is going to be used for [external authentication](https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#external-authentication), the following annotation needs to be added to the ingress manifest:
+```bash
+nginx.ingress.kubernetes.io/auth-url: "URL to the authentication service"
+```   
+
 The list of deployments can be seen by running:
 ```bash
 kubectl get deployments
@@ -335,9 +340,46 @@ fence:
     # This is important for data upload.
     DATA_UPLOAD_BUCKET: "gen3-bucket"
 ```
-The other `fence` endpoints can be found over [here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/uc-cdis/fence/master/openapis/swagger.yaml). For example the POST method for uploading a file to a bucket can be used with `curl` as follows (an open-source tool like [Postman](https://www.postman.com/) can be used if it's more convenient):
+The other `fence` endpoints can be found over [here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/uc-cdis/fence/master/openapis/swagger.yaml). 
+
+#### Google Authentication
+The `fence-service` is mainly responsible for Gen3 authentication. There are a variety of authentication providers. If [Google is to be used for authentication](https://github.com/uc-cdis/fence/blob/master/docs/google_architecture.md), then a project needs to be created in the [Google Cloud Console](https://console.cloud.google.com/). This project will need to be part of an organisation. In our case, the organisation is **wits.ac.za**, and the project is called **gen3-dev**.    
+
+The Google project needs to be setup correctly. The project needs to be a _web application_, it needs to be _external_, the authorised redirect uri needs to be configured as the `${hostname}/user/login/google/login/, and the following scopes are required:
+- openid
+- email
+- profile
+
+![Google OAuth App Setup](public/assets/images/google-oauth-app-setup.png "Google OAuth App Setup")    
+
+If the correct values are provided, the Google authentication is setup correctly, and the ingress is setup correctly, then the `fence` authentication should work properly:
+![Gen3 Login](public/assets/images/gen3-login.png "Gen3 Login")    
+
+The `fence-config` is a Kubernetes secret and its contents can be viewed in YAML format with the following command:
 ```bash
-curl -X POST http://<ip-address>:<nodePort>/data/upload
-   -H "Content-Type: application/json"
-   -d '{"file_name": "my_file.bam", "bucket": "gen3-bucket", "expires_in": 1200, "authz": ["/programs/A"]}' 
+kubectl get secret fence-config -o yaml
 ```
+The output should look similar to this:
+```yaml
+apiVersion: v1
+data:
+  fence-config.yaml: QkFTRV9VUkw6IGh0dHBzOi...mdlX2FyZWE6CiAgICAtIC9kYmdhcC8K
+kind: Secret
+metadata:
+  annotations:
+    meta.helm.sh/release-name: gen3-dev
+    meta.helm.sh/release-namespace: default
+  creationTimestamp: "2024-01-30T08:03:14Z"
+  labels:
+    app.kubernetes.io/managed-by: Helm
+  name: fence-config
+  namespace: default
+  resourceVersion: "2149406"
+  uid: f48d526f-7d49-4510-978b-565e0a5b7f55
+type: Opaque
+```
+The value in the data field is the base64 encoded form of the actual `fence-config.yaml` file. To decode it, the following command can be used:
+```bash
+echo 'base64 encoded value' | base64 --decode
+```
+This command will output the contents of the `fence-config.yaml` file in the correct YAML format. The values inside this YAML file can be checked to ensure that they match what was specified in the `values.yaml` file when the Helm deployment took place. 
