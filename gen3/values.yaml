@@ -5,7 +5,7 @@ global:
     master:
       username: postgres
       password: postgres
-      host: gen3-dev-postgresql
+      host:
       port: "5432"
   hostname: cloud08.core.wits.ac.za
   revproxyArn: arn:aws:acm:us-east-1:123456:certificate
@@ -70,10 +70,12 @@ fence:
         aws_access_key_id: ""
         aws_secret_access_key: ""
     S3_BUCKETS:
+      # Name of the actual s3 bucket
       gen3-bucket:
         cred: "gen3-user"
         endpoint_url: "s3.us-east-1.amazonaws.com"
-        region: 'us-east-1'
+        region: us-east-1
+    # This is important for data upload.
     DATA_UPLOAD_BUCKET: "gen3-bucket"
   # -- (string) USER YAML. Passed in as a multiline string.
   USER_YAML:
