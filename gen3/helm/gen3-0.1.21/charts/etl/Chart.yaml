@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: master
-description: A Helm chart for gen3 etl
-name: etl
-type: application
-version: 0.1.0

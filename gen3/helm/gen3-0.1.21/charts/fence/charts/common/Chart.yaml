@@ -1,6 +1,0 @@
-apiVersion: v2
-appVersion: master
-description: A Helm chart for provisioning databases in gen3
-name: common
-type: library
-version: 0.1.8
