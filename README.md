@@ -350,11 +350,16 @@ The Google project needs to be setup correctly. The project needs to be a _web a
 - email
 - profile
 
-![Google OAuth App Setup](public/assets/images/google-oauth-app-setup.png "Google OAuth App Setup")    
+![Google OAuth App Setup](public/assets/images/google-oauth-app-setup.png "Google OAuth App Setup")   
 
-If the correct values are provided, the Google authentication is setup correctly, and the ingress is setup correctly, then the `fence` authentication should work properly:
-![Gen3 Login](public/assets/images/gen3-login.png "Gen3 Login")    
+If the correct values are provided, and the Google authentication and the ingress is setup correctly, then the `fence` authentication should work properly:   
 
+![Gen3 Login](public/assets/images/gen3-login.png "Gen3 Login")   
+
+#### Uploading of Files
+A detailed description of how the upload process works in Gen3 can be found over [here](https://gen3.org/resources/user/gen3-client/). The data client SDK can be downloaded for Linux, MacOS, or Windows. It is in `.zip` format, and can be extracted into a folder and used accordingly. For convenience, all three `.zip` files have been included in this repository in the `/public/assets/sdk` directory (there is no guarantee that the `.zip` files in this directory are the most recent. Please check the website directly).   
+
+#### Modifying the Fence Config File   
 The `fence-config` is a Kubernetes secret and its contents can be viewed in YAML format with the following command:
 ```bash
 kubectl get secret fence-config -o yaml
