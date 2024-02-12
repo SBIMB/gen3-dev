@@ -359,6 +359,23 @@ If the correct values are provided, and the Google authentication and the ingres
 #### Uploading of Files
 A detailed description of how the upload process works in Gen3 can be found over [here](https://gen3.org/resources/user/gen3-client/). The data client SDK can be downloaded for Linux, MacOS, or Windows. It is in `.zip` format, and can be extracted into a folder and used accordingly. For convenience, all three `.zip` files have been included in this repository in the `/public/assets/sdk` directory (there is no guarantee that the `.zip` files in this directory are the most recent. Please check the website directly).   
 
+The `gen3-client` SDK is used to upload files to a bucket, and `indexd` is used to label the files with the appropriate metadata (like GUIDs).   
+
+![Gen3-Client Upload Architecture](public/assets/images/gen3-client-upload-architecture.png "Gen3-Client Upload Architecture")    
+
+If a **403 Unauthorized** error is returned when trying to upload a file, it is likely that the `usersync` job that ran during the Helm deployment did not update the `useryaml` config map to have the necessary permissions for uploading. This can be remedied manually by doing the following:   
+```bash
+# delete the old job that ran during the Helm deployment
+kubectl delete job useryaml
+
+# update the fence config map
+kubectl delete cm fence
+kubectl create cm fence --from-file user.yaml
+
+# create a new job from the useryaml-job.yaml manifest found in this repo
+kubectl apply -f useryaml-job.yaml
+```
+
 #### Modifying the Fence Config File   
 The `fence-config` is a Kubernetes secret and its contents can be viewed in YAML format with the following command:
 ```bash

@@ -75,6 +75,10 @@ fence:
         cred: "gen3-user"
         endpoint_url: "s3.us-east-1.amazonaws.com"
         region: us-east-1
+      gen3-user-bucket:
+        cred: "gen3-user"
+        endpoint_url: "s3.us-east-1.amazonaws.com"
+        region: us-east-1
     # This is important for data upload.
     DATA_UPLOAD_BUCKET: "gen3-bucket"
   # -- (string) USER YAML. Passed in as a multiline string.
@@ -100,7 +104,8 @@ fence:
     # -- (bool) Forces ONLY a dbgap sync if "true", IGNORING user.yaml
     onlyDbgap: false
     # -- (string) Path to the user.yaml file in S3.
-    userYamlS3Path: s3://cdis-gen3-users/helm-test/user.yaml
+    # userYamlS3Path: s3://cdis-gen3-users/helm-test/user.yaml
+    userYamlS3Path: s3://gen3-user-bucket/user.yaml
     # -- (string) Slack webhook endpoint used with certain jobs.
     slack_webhook: None
     # -- (bool) Will echo what files we are seeing on dbgap ftp to Slack.
