@@ -374,7 +374,7 @@ kubectl delete configmap fence
 kubectl create configmap fence --from-file gen3/user.yaml
 
 # create a new job from the useryaml-job.yaml manifest found in this repo
-kubectl apply -f useryaml-job.yaml
+kubectl apply -f gen3/useryaml-job.yaml
 ```
 
 #### Modifying the Fence Config File   
