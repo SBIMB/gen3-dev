@@ -14,6 +14,7 @@ sudo curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 However, if we wish to use a different load balancer or different ingress controller, then the default ones can be disabled when running the installation script. In our case, we'd like to use the [metallb load balancer](https://metallb.universe.tf/) and the [nginx ingress controller](https://docs.nginx.com/nginx-ingress-controller/installation/installing-nic/). The following command uses the installation script, but disables the default load balancer and ingress controller:
 ```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable servicelb --disable traefik" sh -s - --write-kubeconfig-mode 644
+curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable servicelb" sh -s - --write-kubeconfig-mode 644
 ```   
 The installation includes additional utilities such as `kubectl`, `crictl`, `ctr`, `k3s-killall.sh`, and `k3s-uninstall.sh`. `kubectl` will automatically use the `kubeconfig` file that gets written to `/etc/rancher/k3s/k3s.yaml` after the installation. By default, the container runtime that K3s uses is `containerd`.    
 
@@ -369,8 +370,8 @@ If a **403 Unauthorized** error is returned when trying to upload a file, it is 
 kubectl delete job useryaml
 
 # update the fence config map
-kubectl delete cm fence
-kubectl create cm fence --from-file user.yaml
+kubectl delete configmap fence
+kubectl create configmap fence --from-file gen3/user.yaml
 
 # create a new job from the useryaml-job.yaml manifest found in this repo
 kubectl apply -f useryaml-job.yaml
