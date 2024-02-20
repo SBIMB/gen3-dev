@@ -2,3 +2,4 @@
 strict-local.sh
 hosts.txt
 resolv.conf
+gen3/values.dev.yaml

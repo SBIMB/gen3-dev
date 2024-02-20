@@ -114,6 +114,7 @@ the following information was found:
 -A KUBE-SERVICES -d 10.43.120.234/32 -p tcp -m comment --comment "default/gen3-dev-manifestservice:http has no endpoints" -m tcp --dport 80 -j REJECT --reject-with icmp-port-unreachable
 -A KUBE-SERVICES -d 10.43.145.199/32 -p tcp -m comment --comment "default/elasticsearch has no endpoints" -m tcp --dport 9200 -j REJECT --reject-with icmp-port-unreachable
 ```
+
 When running
 ```bash
 kubectl get endpoints
@@ -149,73 +150,7 @@ Perhaps the solution entails explicitly allowing traffic to those IP addresses l
 ```bash
 sudo iptables -t nat -L KUBE-SERVICES -n  | column -t
 ```   
-A long list of services will be displayed, however, the `peregrine`, `pidgin`, `elasticsearch`, `sheepdog`, and the `portal` services are not listed. Somehow the Firewall or the `kube-proxy` is blocking traffic to those services.   
-
-The `peregrine` deployment pod refuses to reach a READY state due to some SSL error of the form
-```bash
-ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:852)
-```
-When running the cURL command,
-```bash
-curl https://s3.amazonaws.com/dictionary-artifacts/datadictionary/develop/schema.json
-```
-from inside the VM, a full JSON response is received. However, when running that same cURL command from inside the pod (with the `--image=nicolaka/netshoot` container running for debugging purposes), we get an ssl connection refused error (see image).   
-![Netshoot Debugging](/public/assets/images/netshoot-debugging.png "Netshoot Debugging")   
-
-The command for debugging the container is
-```bash
-kubectl debug <podname> -it --image=nicolaka/netshoot
-```
-and the command for entering into a running container is
-```bash
-kubectl exec --stdin --tty <podname> -- bash
-```
-There is reason to believe that certain certificates which are on the host machine are not present or accessible in the containers.   
-
-We could also create a `netshoot-pod` in the `default` namespace by using the following manifest:   
-**netshoot-pod.yaml**
-```yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: netshoot-pod
-  namespace: default
-spec:
-  containers:
-  - name: netshoot
-    image: nicolaka/netshoot
-    command: ["/bin/bash", "-c", "--"]
-    args: ["while true; do sleep 30; done;"]
-```
-The pod can be created with:
-```bash
-kubectl apply -f netshoot-pod.yaml
-```
-and a shell to the `netshoot-pod` container can be opened with:
-```bash
-kubectl exec -it netshoot-pod -- /bin/bash
-```
-While inside the container, we can hit external endpoints like:
-```bash
-curl http://example.com -I
-```
-The goal of performing such exercises is to see if containers inside the cluster can make network requests to services outside of the cluster. The following two screenshots clearly indicate that there is a problem when trying to reach external services from within the cluster.   
-
-![HTTP Request from inside Netshoot Container](/public/assets/images/netshoot-curl-http.png "HTTP Request from inside Netshoot Container")    
-
-![HTTPS Request from inside Netshoot Container](/public/assets/images/netshoot-curl-https.png "HTTPS Request from inside Netshoot Container")   
-
-These requests fail. However, when setting `hostNetwork: true` in the `.spec` of the pod definition, then there is a successful response.   
-
-![Host Network True](/public/assets/images/netshoot-hostnetwork-true.png "Host Network True")    
-
-Setting `hostNetwork: true` in the `.spec` of the pod templates of the Gen3 deployments does not work as desired. Errors of the type 
-```bash
-0/1 nodes are available: 1 node(s) didn't have free ports for the requested pod ports. preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod
-``` 
-are encountered. We need to determine if Flannel is responsible for this network behaviour, and perhaps a different CNI should be installed (like Calico or Cilium). Before resorting to such drastic measures (I know very little about CNIs), it might be safer to restart K3s with the following flag set: `--disable-network-policy`, since K3s includes an embedded network policy controller.    
-
-openssl s_client -connect s3.amazonaws.com:443 -servername s3.amazonaws.com
+A long list of services will be displayed, however, the `peregrine`, `pidgin`, `elasticsearch`, `sheepdog`, and the `portal` services are not listed. It could be that somehow the Firewall or the `kube-proxy` is blocking traffic to those services.   
 
 Adding the following rules to the `iptables` script might help:
 ```bash
@@ -246,6 +181,79 @@ sudo iptables -t mangle -F
 sudo iptables -F
 sudo iptables -X
 ```
+
+The `peregrine` deployment pod refuses to reach a READY state due to some SSL error of the form
+```bash
+ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:852)
+```
+When running the cURL command,
+```bash
+curl https://s3.amazonaws.com/dictionary-artifacts/datadictionary/develop/schema.json
+```
+from inside the VM, a full JSON response is received. However, when running that same cURL command from inside the pod (with the `--image=nicolaka/netshoot` container running for debugging purposes), we get an ssl connection refused error (see image).   
+![Netshoot Debugging](/public/assets/images/netshoot-debugging.png "Netshoot Debugging")   
+
+The command for debugging the container is
+```bash
+kubectl debug <podname> -it --image=nicolaka/netshoot
+```
+and the command for entering into a running container is
+```bash
+kubectl exec --stdin --tty <podname> -- bash
+```
+For example, to attach a debugging sidecar container to the `coredns` pod, the following command can be run:
+```bash
+kubectl debug coredns-6799fbcd5-nw5fw -n kube-system -it --image=busybox:1.28 --target=coredns
+```
+The contents of the `resolv.conf` can be seen with:
+```bash
+cat etc/resolv.conf
+```
+
+There is reason to believe that certain certificates which are on the host machine are not present or accessible in the containers.   
+
+We could also create a `netshoot-pod` in the `default` namespace by using the following manifest:   
+**netshoot-pod.yaml**
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: netshoot-pod
+  namespace: default
+spec:
+  containers:
+  - name: netshoot
+    image: nicolaka/netshoot
+    command: ["/bin/bash", "-c", "--"]
+    args: ["while true; do sleep 30; done;"]
+```
+The pod can be created with:
+```bash
+kubectl apply -f netshoot-pod.yaml
+```
+and a shell to the `netshoot-pod` container can be opened with:
+```bash
+kubectl exec -it netshoot-pod -- /bin/bash
+```
+While inside the container, we can hit external endpoints like:
+```bash
+curl https://example.com -I
+```
+The goal of performing such exercises is to see if containers inside the cluster can make network requests to services outside of the cluster. The following two screenshots clearly indicate that there is a problem when trying to reach external services from within the cluster.   
+
+![HTTP Request from inside Netshoot Container](/public/assets/images/netshoot-curl-http.png "HTTP Request from inside Netshoot Container")    
+
+![HTTPS Request from inside Netshoot Container](/public/assets/images/netshoot-curl-https.png "HTTPS Request from inside Netshoot Container")   
+
+These requests fail. However, when setting `hostNetwork: true` in the `.spec` of the pod definition, then there is a successful response.   
+
+![Host Network True](/public/assets/images/netshoot-hostnetwork-true.png "Host Network True")    
+
+Setting `hostNetwork: true` in the `.spec` of the pod templates of the Gen3 deployments does not work as desired. Errors of the type 
+```bash
+0/1 nodes are available: 1 node(s) didn't have free ports for the requested pod ports. preemption: 0/1 nodes are available: 1 No preemption victims found for incoming pod
+``` 
+are encountered. This is because only _one_ pod can use the host's network, since the host node only has one ip address. This is clearly **not** the solution.   
 
 While inside the `netshoot` pod, we can run 
 ```bash
@@ -288,6 +296,7 @@ nameserver 10.43.0.10
 options ndots:5
 ```
 
+**NGINX Load Balancer**
 Create an NGINX load balancer that runs inside a Docker container:
 ```bash
 sudo docker run -d --restart unless-stopped \

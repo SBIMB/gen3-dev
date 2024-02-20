@@ -56,9 +56,9 @@ aws-es-proxy:
 fence:
   enabled: true
   image:
-    repository: quay.io/cdis/fence
-    pullPolicy: Always
-    tag: "master"
+    repository:
+    pullPolicy:
+    tag:
   FENCE_CONFIG:
     APP_NAME: 'Gen3 Data Commons with K3s'
     OPENID_CONNECT:
@@ -104,7 +104,6 @@ fence:
     # -- (bool) Forces ONLY a dbgap sync if "true", IGNORING user.yaml
     onlyDbgap: false
     # -- (string) Path to the user.yaml file in S3.
-    # userYamlS3Path: s3://cdis-gen3-users/helm-test/user.yaml
     userYamlS3Path: s3://gen3-user-bucket/user.yaml
     # -- (string) Slack webhook endpoint used with certain jobs.
     slack_webhook: None
@@ -206,9 +205,9 @@ metadata:
 peregrine:
   enabled: true
   image:
-    repository: quay.io/cdis/peregrine
-    pullPolicy: IfNotPresent
-    tag: ""
+    repository:
+    pullPolicy:
+    tag:
 
 pidgin:
   enabled: true

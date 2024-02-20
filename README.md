@@ -14,7 +14,6 @@ sudo curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 However, if we wish to use a different load balancer or different ingress controller, then the default ones can be disabled when running the installation script. In our case, we'd like to use the [metallb load balancer](https://metallb.universe.tf/) and the [nginx ingress controller](https://docs.nginx.com/nginx-ingress-controller/installation/installing-nic/). The following command uses the installation script, but disables the default load balancer and ingress controller:
 ```bash
 curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable servicelb --disable traefik" sh -s - --write-kubeconfig-mode 644
-curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable servicelb" sh -s - --write-kubeconfig-mode 644
 ```   
 The installation includes additional utilities such as `kubectl`, `crictl`, `ctr`, `k3s-killall.sh`, and `k3s-uninstall.sh`. `kubectl` will automatically use the `kubeconfig` file that gets written to `/etc/rancher/k3s/k3s.yaml` after the installation. By default, the container runtime that K3s uses is `containerd`.    
 
@@ -38,6 +37,20 @@ After about a minute or so, the following command can be run to see if the clust
 kubectl get all -n kube-system
 ```
 ![Resources in kube-system Namespace](/public/assets/images/kube-system-resources.png "Resources in kube-system Namespace")   
+
+It's very important to configure the `coredns` pods after a new installation of a K3s cluster. The cluster needs to resolve the DNS in the same way as the host node. To do this, we need to update the `/etc/rancher/k3s/config.yaml` file by appending the kubelet arg, i.e. 
+```bash
+echo 'kubelet-arg:' | sudo tee -a /etc/rancher/k3s/config.yaml
+echo '- "resolv-conf=/etc/k3s-resolv.conf"' | sudo tee -a /etc/rancher/k3s/config.yaml
+```
+This is done so that K3s will automatically read the DNS config at startup. A K3s stop-and-start will be needed for the changes to be reflected, so the following commands should be run:
+```bash
+sudo systemctl stop k3s
+sleep 10
+sudo systemctl start k3s
+systemctl status k3s
+```
+The `coredns` pod in the `kube-system` namespace should be deleted (it will be recreated immediately and should read the updated configuration).
 
 If something is not quite right and there is a desire to re-install K3s with some other features enabled/disabled, it can be fully uninstalled with:
 ```bash
@@ -218,6 +231,28 @@ kubectl delete deployment my-deployment
 kubectl delete service my-deployment
 kubectl delete ingress my-deployment-ingress
 ```
+### Cert Manager
+The `cert-manager` manifest can be applied in order to install all the `cert-manager` resources:
+```bash
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.2/cert-manager.yaml
+```
+To confirm that the pods are running, use the command:
+```bash
+kubectl get pods -n cert-manager
+```
+| NAME                                     | READY | STATUS   | RESTARTS | AGE |
+| ---------------------------------------- | ----- | -------- | -------- | --- |
+| cert-manager-cainjector-665cd78979-4vldh | 1/1   | Running  | 0        | 7m  |
+| cert-manager-9f74c854d-t8gv2             | 1/1   | Running  | 0        | 7m  |
+| cert-manager-webhook-65767c6f65-6drjt    | 1/1   | Running  | 0        | 7m  |   
+
+We need to create a **ClusterIssuer** in order to issue certificates to the host domain that we configured in our ingress resource. We'll use the [Let's Encrypt](https://letsencrypt.org/docs/) certificate authority because it provides TLS certificates that are free. It also provides certificates from a staging server (which are useful for testing) and certificates from a production server (which rolls out TLS certificates that are verifiable).   
+
+The manifests for both the `staging-issuer.yaml` and `prod-issuer.yaml` can be found in this repository inside the `cert-manager` folder. The email address specified inside the two manifests will be used to register a staging and prod ACME account, and the respective private keys of each ACME account should be stored inside the corresponding Kubernetes secrets called `letsencrypt-staging` and `letsencrypt-prod`. The command for generating a Kubernetes secret is:
+```bash
+  kubectl create secret generic letsencrypt-staging --from-literal=acme=acmeprivatekeyforstaging
+  kubectl create secret generic letsencrypt-prod --from-literal=acme=acmeprivatekeyforprod
+```
 
 ### Installing Gen3 Microservices with Helm
 The Helm charts for the Gen3 services can be found in the [uc-cdis/gen3-helm repository](https://github.com/uc-cdis/gen3-helm.git). We'd like to add the Gen3 Helm chart repository. To do this, we run:  
@@ -371,10 +406,10 @@ kubectl delete job useryaml
 
 # update the fence config map
 kubectl delete configmap fence
-kubectl create configmap fence --from-file gen3/user.yaml
+kubectl create configmap fence --from-file user.yaml
 
 # create a new job from the useryaml-job.yaml manifest found in this repo
-kubectl apply -f gen3/useryaml-job.yaml
+kubectl apply -f useryaml-job.yaml
 ```
 
 #### Modifying the Fence Config File   

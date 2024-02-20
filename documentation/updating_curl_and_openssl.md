@@ -5,12 +5,12 @@ wget https://curl.se/download/curl-8.4.0.zip
 ```
 This binary file needs to be unzipped:
 ```bash
-unzip curl-8.3.0.zip
+unzip curl-8.4.0.zip
 ```
 A directory called `curl-8-4-0` will be created as a part of the unzipping process. Inside this directory, the installation process needs to take place:
 ```bash
 cd curl-8.4.0
-./configure --prefix=$HOME/curl --without-openssl
+./configure --prefix=$HOME/curl --without-ssl
 make
 make install
 ```
