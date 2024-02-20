@@ -1,7 +1,7 @@
 authz:
   # policies automatically given to anyone, even if they are not authenticated
   anonymous_policies:
-  - open_data_reader
+  - storage_reader
 
   # policies automatically given to authenticated users (in addition to their other policies)
   all_users_policies: []
@@ -78,10 +78,8 @@ authz:
     - /programs
   - id: open_data_reader
     role_ids:
-    - guppy_reader
-    - fence_reader
-    - peregrine_reader
-    - sheepdog_reader
+    - reader
+    - storage_reader
     resource_paths:
     - /open
   - id: all_programs_reader
