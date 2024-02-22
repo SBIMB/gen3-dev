@@ -478,6 +478,13 @@ Once the access token has been obtained, then additional requests can be made us
 ```bash
 --header 'Authorization: Bearer accessTokenReceivedFromPreviousRequest' \
 ```
+Before a file can be uploaded, a program and a project needs to be created. To create a program, append `/_root` to the base url of the data commons, i.e. 
+```bash
+https://cloud08.core.wits.ac.za/_root
+```
+On the UI, select the form submission option and search for _program_ in the dropdown list. The **dbgap_accession_number** and **name** fields need to be filled in ("123" can be used for the former, and "Program1" for the latter). At this point, the "Upload submission json from form" button can be clicked and then "Submit". If the creation is unsuccessful, the `sheepdog` logs can be looked at for more details. The programs and projects get stored in the `sheepdog` database (/datadictionary), so _that_ can also be checked to ensure that the program was actually created. If the newly created program is in the data dictionary, then the next step will be to create a project.   
+
+To create a project, visit `https://cloud08.core.wits.ac.za/<program_name>`, where `program_name` is the program under which the project will be created. This time, search for _project_ in the dropdown list and then fill in the fields. We can use "P1" as **code**, "phs1" as **dbgap_accession_number**, and "project1" as **name**. The "Upload submission json from form" should then be clicked, and then "Submit". Once again, the `sheepdog` database can be checked to see if creation was successful.
 
 #### Modifying the Fence Config File   
 The `fence-config` is a Kubernetes secret and its contents can be viewed in YAML format with the following command:
@@ -508,10 +515,3 @@ The value in the data field is the base64 encoded form of the actual `fence-conf
 echo 'base64 encoded value' | base64 --decode
 ```
 This command will output the contents of the `fence-config.yaml` file in the correct YAML format. The values inside this YAML file can be checked to ensure that they match what was specified in the `values.yaml` file when the Helm deployment took place. 
-
-```bash
-curl -H {'Authorization': 'bearer '+ 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImZlbmNlX2tleV9rZXkiLCJ0eXAiOiJKV1QifQ.eyJwdXIiOiJhY2Nlc3MiLCJpc3MiOiJodHRwczovL2Nsb3VkMDguY29yZS53aXRzLmFjLnphL3VzZXIiLCJhdWQiOlsiaHR0cHM6Ly9jbG91ZDA4LmNvcmUud2l0cy5hYy56YS91c2VyIiwidXNlciIsImdvb2dsZV9zZXJ2aWNlX2FjY291bnQiLCJvcGVuaWQiLCJnb29nbGVfbGluayIsImRhdGEiLCJhZG1pbiIsImdhNGdoX3Bhc3Nwb3J0X3YxIiwiZmVuY2UiLCJnb29nbGVfY3JlZGVudGlhbHMiXSwiaWF0IjoxNzA4NTQzNTk4LCJleHAiOjE3MDg1NDcxOTgsImp0aSI6ImZjZTQ4YmFhLWU3NmYtNGJiZi05OWIwLTgyYjQ4MDJmZDkxZCIsInNjb3BlIjpbInVzZXIiLCJnb29nbGVfc2VydmljZV9hY2NvdW50Iiwib3BlbmlkIiwiZ29vZ2xlX2xpbmsiLCJkYXRhIiwiYWRtaW4iLCJnYTRnaF9wYXNzcG9ydF92MSIsImZlbmNlIiwiZ29vZ2xlX2NyZWRlbnRpYWxzIl0sImNvbnRleHQiOnsidXNlciI6eyJuYW1lIjoiYTAwNDU2NjFAd2l0cy5hYy56YSIsImlzX2FkbWluIjpmYWxzZSwiZ29vZ2xlIjp7InByb3h5X2dyb3VwIjpudWxsfX19LCJhenAiOiIiLCJzdWIiOiIyIn0.RGDUmb7P1zlTqTo2OmxtHm4UbLYb_8pgnrn6M65prpt67o3835RTYa-O9RiDiBt01XF6bVOLHb76pxKNDY-jpxEB_phjsSUqEUw44wM-VwPCzQpkYlpvGdO-Qt1fSFMFf_YuREBYhNi-60y60Fn-tKdxTYTldjzHIV8u5QULCBnR740Tm-iEd0H3yIBBdDiSdjUel5ktc_XPkczQ7ILo3cJm9l_5tS3BIJ4iUIyI2iBLeZOpYOkfPI8Nzc4mDZKsM0aGmtmb_lTCqbNZbx4irPIcvyas-3th2Y_hRoiEEyfag9DxcQdv63mHOdiXI_DMpB9AVSOhE-ImVhJLYra4uwWrOqEw9zpK6Tn8Y_Fis39mkfALc203OqKnVJpYb26vQwnn1nLeteNKCwiTxajljXXSltc60P2FlO1wXfWOsFYtDJhYKklybfjL20xLlshwdBHp1Y1asn2OBlYVjldeeuflvX4rbGWTqPgB2J2Mn3SrSDc9OqLoMcEfpP-tNPOfxci0Nwi80pX1vu7sLKIn8IEUBup-S0kJ0ouSEoFKWSdm7THuGT4J9IaDppXL1bMHmO5cp194xYEYxCwaTeXM9FJ_wCCZozsPr7fAQ9IZyZYw3ROXrPTWT1NxMupw3hJVSRBg9jd23dqmkWti5pWFY3DPYllt1fIF5rXMXuqq4X8'} \
-      -d '{ "title":"foo","body":"bar", "id": 1}' \
-      -X POST \
-      https://example.com/posts
-```
