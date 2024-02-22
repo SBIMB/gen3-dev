@@ -248,12 +248,53 @@ kubectl get pods -n cert-manager
 
 We need to create a **ClusterIssuer** in order to issue certificates to the host domain that we configured in our ingress resource. We'll use the [Let's Encrypt](https://letsencrypt.org/docs/) certificate authority because it provides TLS certificates that are free. It also provides certificates from a staging server (which are useful for testing) and certificates from a production server (which rolls out TLS certificates that are verifiable).   
 
-The manifests for both the `staging-issuer.yaml` and `prod-issuer.yaml` can be found in this repository inside the `cert-manager` folder. The email address specified inside the two manifests will be used to register a staging and prod ACME account, and the respective private keys of each ACME account should be stored inside the corresponding Kubernetes secrets called `letsencrypt-staging` and `letsencrypt-prod`. The command for generating a Kubernetes secret is:
+The manifests for both the `staging-issuer.yaml` and `prod-issuer.yaml` can be found in this repository inside the `cert-manager` folder. They can be created as follows:
+```bash
+kubectl create -f cert-manager/staging-issuer.yaml
+kubectl create -f cert-manager/prod-issuer.yaml
+```
+
+The email address specified inside the two manifests will be used to register a staging and prod ACME account, and the respective private keys of each ACME account should be stored inside the corresponding Kubernetes secrets called `letsencrypt-staging` and `letsencrypt-prod`. The command for generating a Kubernetes secret is:
 ```bash
   kubectl create secret generic letsencrypt-staging --from-literal=acme=acmeprivatekeyforstaging
   kubectl create secret generic letsencrypt-prod --from-literal=acme=acmeprivatekeyforprod
 ```
+However, these secrets need not be created manually, since the `staging-issuer.yaml` and `prod-issuer.yaml` files would create the secrets. This can be seen with:
+```bash
+kubectl get secrets -n cert-manager
+```
+| NAME                    | TYPE   | DATA | AGE   |
+| ----------------------- | ------ | ---- | ----- |
+| cert-manager-webhook-ca | Opaque | 3    | 1h12m |
+| letsencrypt-staging     | Opaque | 1    | 10m   |
+| letsencrypt-prod        | Opaque | 1    | 10m   |
 
+The certificates will only be created after updating and annotating the ingress resource (`revproxy-dev`). The ingress should be updated by adding the following annotation (for testing):
+```bash
+cert-manager.io/cluster-issuer: "letsencrypt-staging"
+```
+or the following annotation (when ready for use):
+```bash
+cert-manager.io/cluster-issuer: "letsencrypt-prod"
+```
+The ingress manifest needs to be modified such that the following block appears underneath the `spec`:
+```bash
+  tls:
+  - hosts:
+    - cloud08.core.wits.ac.za
+    secretName: gen3-certs
+  - hosts:
+    - cloud08.core.wits.ac.za
+    secretName: echo-tls
+```
+After editing the ingress manifest, the certificate creation events can be seen when running the command:
+```bash
+kubectl describe ingress
+```
+Details of the certificate can be seen with:
+```bash
+kubectl describe certificate
+```
 ### Installing Gen3 Microservices with Helm
 The Helm charts for the Gen3 services can be found in the [uc-cdis/gen3-helm repository](https://github.com/uc-cdis/gen3-helm.git). We'd like to add the Gen3 Helm chart repository. To do this, we run:  
 
@@ -395,7 +436,7 @@ If the correct values are provided, and the Google authentication and the ingres
 #### Uploading of Files
 A detailed description of how the upload process works in Gen3 can be found over [here](https://gen3.org/resources/user/gen3-client/). The data client SDK can be downloaded for Linux, MacOS, or Windows. It is in `.zip` format, and can be extracted into a folder and used accordingly. For convenience, all three `.zip` files have been included in this repository in the `/public/assets/sdk` directory (there is no guarantee that the `.zip` files in this directory are the most recent. Please check the website directly).   
 
-The `gen3-client` SDK is used to upload files to a bucket, and `indexd` is used to label the files with the appropriate metadata (like GUIDs).   
+The `gen3-client` SDK is used to upload files to a bucket, and `indexd` is used to label the files with the appropriate metadata (like GUIDs).  
 
 ![Gen3-Client Upload Architecture](public/assets/images/gen3-client-upload-architecture.png "Gen3-Client Upload Architecture")    
 
@@ -410,6 +451,32 @@ kubectl create configmap fence --from-file user.yaml
 
 # create a new job from the useryaml-job.yaml manifest found in this repo
 kubectl apply -f useryaml-job.yaml
+```
+To see if the roles and policies have been updated, the logs from the `arborist-deployment` can be checked with
+```bash
+kubectl logs <arborist-pod-name>
+```
+![Arborist Logs](public/assets/images/arborist-logs-for-user-roles.png "Arborist Logs") 
+
+To authorise the `gen3-client` for uploading to the data commons, the following command needs to be run:
+```bash
+gen3-client configure --profile=regan-demo --cred=credentials.json --apiendpoint=https://cloud08.core.wits.ac.za/
+```
+If this command does not work, then we can try other methods. The goal here is to obtain an access token. This access token will be used as a bearer token under the _Authorization_ header when making requests to the data commons. To get an access token, a POST request needs to be made to this endpoint:
+```bash
+https://cloud08.core.wits.ac.za/user/credentials/cdis/access_token
+```
+The POST request can be made using a tool like Postman, or directly from the terminal as follows:
+```bash
+curl --location 'https://cloud08.core.wits.ac.za/user/credentials/cdis/access_token' \
+--header 'Content-Type: text/plain' \
+--data '{ "api_key": "apiKeyGeneratedByGen3Portal", "key_id": "f8fb4da3-4983-435e-8fd9-14eb854ee79a" }'
+```
+![Obtain Access Token](public/assets/images/generate-access-token-with-postman.png "Obtain Access Token") 
+
+Once the access token has been obtained, then additional requests can be made using the access token as a bearer token inside the header of requests, e.g.
+```bash
+--header 'Authorization: Bearer accessTokenReceivedFromPreviousRequest' \
 ```
 
 #### Modifying the Fence Config File   
@@ -441,3 +508,10 @@ The value in the data field is the base64 encoded form of the actual `fence-conf
 echo 'base64 encoded value' | base64 --decode
 ```
 This command will output the contents of the `fence-config.yaml` file in the correct YAML format. The values inside this YAML file can be checked to ensure that they match what was specified in the `values.yaml` file when the Helm deployment took place. 
+
+```bash
+curl -H {'Authorization': 'bearer '+ 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImZlbmNlX2tleV9rZXkiLCJ0eXAiOiJKV1QifQ.eyJwdXIiOiJhY2Nlc3MiLCJpc3MiOiJodHRwczovL2Nsb3VkMDguY29yZS53aXRzLmFjLnphL3VzZXIiLCJhdWQiOlsiaHR0cHM6Ly9jbG91ZDA4LmNvcmUud2l0cy5hYy56YS91c2VyIiwidXNlciIsImdvb2dsZV9zZXJ2aWNlX2FjY291bnQiLCJvcGVuaWQiLCJnb29nbGVfbGluayIsImRhdGEiLCJhZG1pbiIsImdhNGdoX3Bhc3Nwb3J0X3YxIiwiZmVuY2UiLCJnb29nbGVfY3JlZGVudGlhbHMiXSwiaWF0IjoxNzA4NTQzNTk4LCJleHAiOjE3MDg1NDcxOTgsImp0aSI6ImZjZTQ4YmFhLWU3NmYtNGJiZi05OWIwLTgyYjQ4MDJmZDkxZCIsInNjb3BlIjpbInVzZXIiLCJnb29nbGVfc2VydmljZV9hY2NvdW50Iiwib3BlbmlkIiwiZ29vZ2xlX2xpbmsiLCJkYXRhIiwiYWRtaW4iLCJnYTRnaF9wYXNzcG9ydF92MSIsImZlbmNlIiwiZ29vZ2xlX2NyZWRlbnRpYWxzIl0sImNvbnRleHQiOnsidXNlciI6eyJuYW1lIjoiYTAwNDU2NjFAd2l0cy5hYy56YSIsImlzX2FkbWluIjpmYWxzZSwiZ29vZ2xlIjp7InByb3h5X2dyb3VwIjpudWxsfX19LCJhenAiOiIiLCJzdWIiOiIyIn0.RGDUmb7P1zlTqTo2OmxtHm4UbLYb_8pgnrn6M65prpt67o3835RTYa-O9RiDiBt01XF6bVOLHb76pxKNDY-jpxEB_phjsSUqEUw44wM-VwPCzQpkYlpvGdO-Qt1fSFMFf_YuREBYhNi-60y60Fn-tKdxTYTldjzHIV8u5QULCBnR740Tm-iEd0H3yIBBdDiSdjUel5ktc_XPkczQ7ILo3cJm9l_5tS3BIJ4iUIyI2iBLeZOpYOkfPI8Nzc4mDZKsM0aGmtmb_lTCqbNZbx4irPIcvyas-3th2Y_hRoiEEyfag9DxcQdv63mHOdiXI_DMpB9AVSOhE-ImVhJLYra4uwWrOqEw9zpK6Tn8Y_Fis39mkfALc203OqKnVJpYb26vQwnn1nLeteNKCwiTxajljXXSltc60P2FlO1wXfWOsFYtDJhYKklybfjL20xLlshwdBHp1Y1asn2OBlYVjldeeuflvX4rbGWTqPgB2J2Mn3SrSDc9OqLoMcEfpP-tNPOfxci0Nwi80pX1vu7sLKIn8IEUBup-S0kJ0ouSEoFKWSdm7THuGT4J9IaDppXL1bMHmO5cp194xYEYxCwaTeXM9FJ_wCCZozsPr7fAQ9IZyZYw3ROXrPTWT1NxMupw3hJVSRBg9jd23dqmkWti5pWFY3DPYllt1fIF5rXMXuqq4X8'} \
+      -d '{ "title":"foo","body":"bar", "id": 1}' \
+      -X POST \
+      https://example.com/posts
+```
