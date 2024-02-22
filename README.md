@@ -484,7 +484,21 @@ https://cloud08.core.wits.ac.za/_root
 ```
 On the UI, select the form submission option and search for _program_ in the dropdown list. The **dbgap_accession_number** and **name** fields need to be filled in ("123" can be used for the former, and "Program1" for the latter). At this point, the "Upload submission json from form" button can be clicked and then "Submit". If the creation is unsuccessful, the `sheepdog` logs can be looked at for more details. The programs and projects get stored in the `sheepdog` database (/datadictionary), so _that_ can also be checked to ensure that the program was actually created. If the newly created program is in the data dictionary, then the next step will be to create a project.   
 
-To create a project, visit `https://cloud08.core.wits.ac.za/<program_name>`, where `program_name` is the program under which the project will be created. This time, search for _project_ in the dropdown list and then fill in the fields. We can use "P1" as **code**, "phs1" as **dbgap_accession_number**, and "project1" as **name**. The "Upload submission json from form" should then be clicked, and then "Submit". Once again, the `sheepdog` database can be checked to see if creation was successful.
+To create a project, visit `https://cloud08.core.wits.ac.za/<program_name>`, where `program_name` is the program under which the project will be created. This time, search for _project_ in the dropdown list and then fill in the fields. We can use "P1" as **code**, "phs1" as **dbgap_accession_number**, and "project1" as **name**. The "Upload submission json from form" should then be clicked, and then "Submit". Once again, the `sheepdog` database can be checked to see if creation was successful.   
+
+As an example, suppose there exists a program called `ReganTestProgram`. Then visiting the url `https://cloud08.core.wits.ac.za/ReganTestProgram` will provide a page on the UI where a project can be created. By filling in the fields mentioned above, the following project JSON will get generated:
+```json
+{
+  "type": "project",
+  "code": "P1",
+  "dbgap_accession_number": "phs1",
+  "name": "ReganTestProject"
+}
+```
+and a green banner with **Succeeded: 200** will be displayed.   
+
+![Successful Project Creation](public/assets/images/successful-project-creation.png "Successful Project Creation") 
+
 
 #### Modifying the Fence Config File   
 The `fence-config` is a Kubernetes secret and its contents can be viewed in YAML format with the following command:
