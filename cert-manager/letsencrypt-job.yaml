@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: letsencrypt-job
+  labels:
+    app: letsencrypt
+spec:
+  template:
+    metadata:
+      name: letsencrypt
+      labels:
+        app: letsencrypt
+    spec:
+      containers:
+      - image: quay.io/hiphipjorge/kube-nginx-letsencrypt:latest
+        name: letsencrypt
+        imagePullPolicy: Always
+        ports:
+        - name: letsencrypt
+          containerPort: 80
+        env:
+        - name: DOMAINS
+          value: cloud08.core.wits.ac.za
+        - name: EMAIL
+          value: a0045661@wits.ac.za
+        - name: SECRET
+          value: letsencrypt-certs
+      restartPolicy: Never

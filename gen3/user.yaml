@@ -97,7 +97,7 @@ authz:
     - deleter
     - storage_writer
     resource_paths:
-    - /programs/ReganTestProgram/projects/ReganTestProject
+    - /programs
 
   roles:
   - id: file_uploader

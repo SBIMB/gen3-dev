@@ -295,6 +295,44 @@ Details of the certificate can be seen with:
 ```bash
 kubectl describe certificate
 ```
+### ArgoCD
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is a useful GitOps tool that allows for continuous delivery by automating application deployments to Kubernetes. It is open-source. Automated rollbacks, automatic synchronisation of deployed applications with a Git repository, and a web-based UI to manage the deployed applications are some of the features that are offered by ArgoCD.   
+
+Let us proceed to install ArgoCD on our cluster. First, we shall create a namespace:
+```bash
+kubectl create namespace
+```
+Then perform a `helm` deployment:
+```bash
+helm install argocd argo/argo-cd --namespace argocd
+```
+If the `helm` deployment completes successfully, the following message should be displayed:
+```bash
+NAME: argocd
+LAST DEPLOYED: Thu Feb 22 17:05:44 2024
+NAMESPACE: argocd
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+In order to access the server UI you have the following options:
+
+1. kubectl port-forward service/argocd-server -n argocd 8080:443
+
+    and then open the browser on http://localhost:8080 and accept the certificate
+
+2. enable ingress in the values file `server.ingress.enabled` and either
+      - Add the annotation for ssl passthrough: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-1-ssl-passthrough
+      - Set the `configs.params."server.insecure"` in the values file and terminate SSL at your ingress: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/#option-2-multiple-ingress-objects-and-hosts
+
+
+After reaching the UI the first time you can login with username: admin and the random password generated during the installation. You can find the password by running:
+
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+(You should delete the initial secret afterwards as suggested by the Getting Started Guide: https://argo-cd.readthedocs.io/en/stable/getting_started/#4-login-using-the-cli)
+```
+
 ### Installing Gen3 Microservices with Helm
 The Helm charts for the Gen3 services can be found in the [uc-cdis/gen3-helm repository](https://github.com/uc-cdis/gen3-helm.git). We'd like to add the Gen3 Helm chart repository. To do this, we run:  
 
@@ -502,34 +540,3 @@ As an example, suppose there exists a program called `program1`. Then visiting t
 and a green banner with **Succeeded: 200** will be displayed.   
 
 ![Successful Project Creation](public/assets/images/successful-project-creation.png "Successful Project Creation") 
-
-
-#### Modifying the Fence Config File   
-The `fence-config` is a Kubernetes secret and its contents can be viewed in YAML format with the following command:
-```bash
-kubectl get secret fence-config -o yaml
-```
-The output should look similar to this:
-```yaml
-apiVersion: v1
-data:
-  fence-config.yaml: QkFTRV9VUkw6IGh0dHBzOi...mdlX2FyZWE6CiAgICAtIC9kYmdhcC8K
-kind: Secret
-metadata:
-  annotations:
-    meta.helm.sh/release-name: gen3-dev
-    meta.helm.sh/release-namespace: default
-  creationTimestamp: "2024-01-30T08:03:14Z"
-  labels:
-    app.kubernetes.io/managed-by: Helm
-  name: fence-config
-  namespace: default
-  resourceVersion: "2149406"
-  uid: f48d526f-7d49-4510-978b-565e0a5b7f55
-type: Opaque
-```
-The value in the data field is the base64 encoded form of the actual `fence-config.yaml` file. To decode it, the following command can be used:
-```bash
-echo 'base64 encoded value' | base64 --decode
-```
-This command will output the contents of the `fence-config.yaml` file in the correct YAML format. The values inside this YAML file can be checked to ensure that they match what was specified in the `values.yaml` file when the Helm deployment took place. 

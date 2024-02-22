@@ -4,6 +4,8 @@ metadata:
   annotations:
     meta.helm.sh/release-name: gen3-dev
     meta.helm.sh/release-namespace: default
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/tls-acme: "true"
     nginx.ingress.kubernetes.io/rewrite-target: /
   labels:
     app.kubernetes.io/managed-by: Helm
@@ -22,12 +24,5 @@ spec:
               number: 80
         path: /
         pathType: Prefix
-      - backend:
-          service:
-            name: revproxy-service
-            port:
-              number: 443
-        path: /
-        pathType: Prefix
   tls:
-  - secretName: gen3-certs
+  - secretName: cloud08-tls-secret
