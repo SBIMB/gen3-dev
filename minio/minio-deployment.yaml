@@ -9,7 +9,7 @@ spec:
   selector:
     matchLabels:
       app: minio
-    strategy:
+  strategy:
     type: Recreate
   template:
     metadata:
