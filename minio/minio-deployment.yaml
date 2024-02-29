@@ -9,18 +9,29 @@ spec:
   selector:
     matchLabels:
       app: minio
+    strategy:
+    type: Recreate
   template:
     metadata:
       labels:
         app: minio
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: cloud08
       containers:
       - name: minio
         # image: docker.io/bitnami/minio:2022
         image: quay.io/minio/minio:latest
+        args:
+        - minio server /data --console-address :9001
+        command:
+        - /bin/bash
+        - -c
         ports:
         - containerPort: 9000
+          hostPort: 9000
         - containerPort: 9001
+          hostPort: 9001
         imagePullPolicy: Always
         env:
         - name: MINIO_BROWSER_REDIRECT_URL
@@ -31,10 +42,19 @@ spec:
           value: "admin"
         - name: MINIO_DEFAULT_BUCKETS
           value: "images"
+        - name: BASE_HREF
+          value: /minio/
+        - name: MINIO_ACCESS_KEY
+          value: "minio_access_key"
+        - name: MINIO_SECRET_KEY
+          value: "minio_secret_key"
         volumeMounts:
         - name: minio-storage
-          mountPath: "/data"
+          mountPath: /data
       volumes:
       - name: minio-storage
         persistentVolumeClaim:
           claimName: minio-pvc
+        hostPath: # not recommended for production, instead use an NFS Share or Amazon EBS
+          path: $HOME/workspace/gen3-volume # Specify a path to a local drive or volume on the Kubernetes worker node
+          type: DirectoryOrCreate # The path to the `hostPath.path` directory must exist
