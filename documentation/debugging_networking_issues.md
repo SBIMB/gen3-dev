@@ -51,6 +51,37 @@ These certificates can be added to a Kubernetes secret as follows:
 ```bash
 kubectl create secret tls cloud08-tls-secret --key cloud08_certs/cloud08.key --cert cloud08_certs/cloud08.crt
 ```
+To create a self-signed certificate with SubjectAltName (SAN), we can do the following:
+```bash
+openssl genrsa -out cloud08.core.wits.ac.za.key 2048
+openssl req -new -key cloud08.core.wits.ac.za.key -out cloud08.core.wits.ac.za.csr
+```
+There will be some prompts. They should be filled in accordingly. Then the following file should be created with
+```bash
+touch v3.ext
+```
+and populated with the following content:
+```bash
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer:always
+basicConstraints       = CA:FALSE
+keyUsage               = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, keyAgreement, keyCertSign
+subjectAltName         = DNS:cloud08.core.wits.ac.za, DNS:*.cloud08.core.wits.ac.za
+issuerAltName          = issuer:copy
+```
+The self-signed certificate can then be generated with the following command:
+```bash
+openssl x509 -req -in cloud08.core.wits.ac.za.csr -signkey cloud08.core.wits.ac.za.key -out cloud08.core.wits.ac.za.crt -days 3650 -sha256 -extfile v3.ext
+```
+If successful, something similar to the following should be the output:
+```bash
+Certificate request self-signature ok
+subject=C = ZA, ST = Gauteng, L = Johannesburg, O = SBIMB, OU = Bioinformatics, CN = cloud08.core.wits.ac.za, emailAddress = a0045661@wits.ac.za
+```
+Now a Kubernetes secret can be created with:
+```bash
+kubectl create secret tls cloud08-tls-secret --key cloud08.core.wits.ac.za.key --cert cloud08.core.wits.ac.za.crt
+```
 We can also create a secret that uses the pre-existing certificates on the node which reside in the `/etc/ssl/certs/` directory:
 ```bash
 kubectl create secret tls cloud08-certs --key /etc/ssl/certs/ca-certificates.key --cert /etc/ssl/certs/ca-certificates.crt
