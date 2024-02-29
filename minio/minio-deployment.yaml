@@ -55,6 +55,6 @@ spec:
       - name: minio-storage
         persistentVolumeClaim:
           claimName: minio-pvc
-        hostPath: # not recommended for production, instead use an NFS Share or Amazon EBS
-          path: $HOME/workspace/gen3-volume # Specify a path to a local drive or volume on the Kubernetes worker node
-          type: DirectoryOrCreate # The path to the `hostPath.path` directory must exist
+        # hostPath: # not recommended for production, instead use an NFS Share or Amazon EBS
+        #   path: $HOME/workspace/gen3-volume # Specify a path to a local drive or volume on the Kubernetes worker node
+        #   type: DirectoryOrCreate # The path to the `hostPath.path` directory must exist
