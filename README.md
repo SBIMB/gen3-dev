@@ -545,7 +545,14 @@ and a green banner with **Succeeded: 200** will be displayed.
 Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exist several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html). There are three new resources that we'll create, and we'll need to modify the ingress file, `revproxy-dev.yaml`, to add the `minio` paths. The three resources to be created are:
 - [minio-pvc](minio/minio-pvc.yaml)
 - [minio-deployment](minio/minio-deployment.yaml)
-- [minio-service](minio/minio-service.yaml)
+- [minio-service](minio/minio-service.yaml)   
+
+To create the `minio` resources in the `default` namespace, run the following commands:
+```bash
+kubectl create -f minio/minio-pvc.yaml
+kubectl create -f minio/minio-deployment.yaml
+kubectl create -f minio/minio-service.yaml
+```
 The ingress file, `revproxy-dev.yaml`, needs to be modified to add the `minio` paths:
 ```yaml
       - backend:
