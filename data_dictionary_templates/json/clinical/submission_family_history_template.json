@@ -1,0 +1,13 @@
+{
+  "relationship_gender": null, 
+  "relationship_primary_diagnosis": null, 
+  "relative_with_cancer_history": null, 
+  "relationship_type": null, 
+  "*submitter_id": null, 
+  "cases": {
+    "submitter_id": null
+  }, 
+  "*type": "family_history", 
+  "relationship_age_at_diagnosis": null, 
+  "project_id": null
+}

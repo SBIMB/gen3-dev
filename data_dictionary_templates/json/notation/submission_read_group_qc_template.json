@@ -1,0 +1,37 @@
+{
+  "workflow_start_datetime": null, 
+  "*submitter_id": null, 
+  "project_id": null, 
+  "workflow_end_datetime": null, 
+  "*read_groups": {
+    "submitter_id": null
+  }, 
+  "workflow_version": null, 
+  "percent_aligned": null, 
+  "total_aligned_reads": null, 
+  "*basic_statistics": null, 
+  "*per_tile_sequence_quality": null, 
+  "*per_sequence_gc_content": null, 
+  "*overrepresented_sequences": null, 
+  "submitted_aligned_reads_files": {
+    "submitter_id": null
+  }, 
+  "*per_base_n_content": null, 
+  "*encoding": null, 
+  "*kmer_content": null, 
+  "*type": "read_group_qc", 
+  "*sequence_length_distribution": null, 
+  "*per_base_sequence_content": null, 
+  "*per_base_sequence_quality": null, 
+  "workflow_type": null, 
+  "*per_sequence_quality_score": null, 
+  "*sequence_duplication_levels": null, 
+  "fastq_name": null, 
+  "*percent_gc_content": null, 
+  "submitted_unaligned_reads_files": {
+    "submitter_id": null
+  }, 
+  "*adapter_content": null, 
+  "*total_sequences": null, 
+  "*workflow_link": null
+}

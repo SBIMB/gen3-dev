@@ -1,0 +1,15 @@
+{
+  "aliquot_volume": null, 
+  "analyte_type_id": null, 
+  "concentration": null, 
+  "amount": null, 
+  "*samples": {
+    "submitter_id": null
+  }, 
+  "analyte_type": null, 
+  "*submitter_id": null, 
+  "aliquot_quantity": null, 
+  "*type": "aliquot", 
+  "project_id": null, 
+  "source_center": null
+}

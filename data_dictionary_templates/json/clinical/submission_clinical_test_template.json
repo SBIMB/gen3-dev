@@ -1,0 +1,30 @@
+{
+  "fev1_fvc_pre_bronch_percent": null, 
+  "estrogen_receptor_percent_positive_ihc": null, 
+  "dlco_ref_predictive_percent": null, 
+  "*submitter_id": null, 
+  "estrogen_receptor_result_ihc": null, 
+  "project_id": null, 
+  "cea_level_preoperative": null, 
+  "*biomarker_name": null, 
+  "fev1_ref_post_bronch_percent": null, 
+  "fev1_ref_pre_bronch_percent": null, 
+  "diagnoses": {
+    "submitter_id": null
+  }, 
+  "fev1_fvc_post_bronch_percent": null, 
+  "progesterone_receptor_percent_positive_ihc": null, 
+  "progesterone_receptor_result_ihc": null, 
+  "ldh_normal_range_upper": null, 
+  "her2_erbb2_percent_positive_ihc": null, 
+  "her2_erbb2_result_fish": null, 
+  "ldh_level_at_diagnosis": null, 
+  "her2_erbb2_result_ihc": null, 
+  "*cases": {
+    "submitter_id": null
+  }, 
+  "*type": "clinical_test", 
+  "*biomarker_test_method": null, 
+  "*biomarker_result": null, 
+  "microsatellite_instability_abnormal": null
+}

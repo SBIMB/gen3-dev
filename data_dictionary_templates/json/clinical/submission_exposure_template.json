@@ -1,0 +1,19 @@
+{
+  "pack_years_smoked": null, 
+  "cigarettes_per_day": null, 
+  "height": null, 
+  "years_smoked": null, 
+  "tobacco_smoking_onset_year": null, 
+  "tobacco_smoking_quit_year": null, 
+  "tobacco_smoking_status": null, 
+  "*submitter_id": null, 
+  "cases": {
+    "submitter_id": null
+  }, 
+  "bmi": null, 
+  "alcohol_history": null, 
+  "*type": "exposure", 
+  "weight": null, 
+  "project_id": null, 
+  "alcohol_intensity": null
+}

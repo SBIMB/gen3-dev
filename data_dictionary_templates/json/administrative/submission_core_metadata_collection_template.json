@@ -1,0 +1,22 @@
+{
+  "creator": null, 
+  "source": null, 
+  "title": null, 
+  "coverage": null, 
+  "rights": null, 
+  "relation": null, 
+  "date": null, 
+  "format": null, 
+  "publisher": null, 
+  "data_type": null, 
+  "description": null, 
+  "subject": null, 
+  "*projects": {
+    "code": null
+  }, 
+  "*submitter_id": null, 
+  "*type": "core_metadata_collection", 
+  "project_id": null, 
+  "contributor": null, 
+  "language": null
+}

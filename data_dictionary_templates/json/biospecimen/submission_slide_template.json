@@ -1,0 +1,30 @@
+{
+  "run_datetime": null, 
+  "apoptotic_concentration": null, 
+  "run_name": null, 
+  "number_proliferating_cells": null, 
+  "*submitter_id": null, 
+  "percent_neutrophil_infiltration": null, 
+  "percent_monocyte_infiltration": null, 
+  "project_id": null, 
+  "ctc_concentration": null, 
+  "section_location": null, 
+  "percent_necrosis": null, 
+  "percent_stromal_cells": null, 
+  "ctc_small_concentration": null, 
+  "percent_eosinophil_infiltration": null, 
+  "percent_inflam_infiltration": null, 
+  "*samples": {
+    "submitter_id": null
+  }, 
+  "*type": "slide", 
+  "percent_tumor_nuclei": null, 
+  "percent_granulocyte_infiltration": null, 
+  "percent_lymphocyte_infiltration": null, 
+  "methanol_added": null, 
+  "slide_identifier": null, 
+  "number_nucleated_cells": null, 
+  "ctc_low_concentration": null, 
+  "percent_normal_cells": null, 
+  "percent_tumor_cells": null
+}

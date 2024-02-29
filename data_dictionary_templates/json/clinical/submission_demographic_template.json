@@ -1,0 +1,13 @@
+{
+  "ethnicity": null, 
+  "year_of_birth": null, 
+  "*submitter_id": null, 
+  "*cases": {
+    "submitter_id": null
+  }, 
+  "race": null, 
+  "gender": null, 
+  "year_of_death": null, 
+  "*type": "demographic", 
+  "project_id": null
+}

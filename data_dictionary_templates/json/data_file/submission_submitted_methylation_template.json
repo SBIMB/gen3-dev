@@ -1,0 +1,24 @@
+{
+  "state_comment": null, 
+  "consent_codes": null, 
+  "assay_method": null, 
+  "*data_format": null, 
+  "*data_category": null, 
+  "*file_size": null, 
+  "object_id": null, 
+  "*data_type": null, 
+  "*submitter_id": null, 
+  "assay_instrument_model": null, 
+  "*file_name": null, 
+  "core_metadata_collections": {
+    "submitter_id": null
+  }, 
+  "*type": "submitted_methylation", 
+  "assay_instrument": null, 
+  "project_id": null, 
+  "*md5sum": null, 
+  "aliquots": {
+    "submitter_id": null
+  }, 
+  "urls": null
+}

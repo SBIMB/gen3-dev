@@ -1,0 +1,29 @@
+{
+  "state_comment": null, 
+  "consent_codes": null, 
+  "*data_format": null, 
+  "run_name": null, 
+  "*submitter_id": null, 
+  "core_metadata_collections": {
+    "submitter_id": null
+  }, 
+  "project_id": null, 
+  "cell_identifier": null, 
+  "*data_type": null, 
+  "panel_used": null, 
+  "*data_category": null, 
+  "slides": {
+    "submitter_id": null
+  }, 
+  "frame_identifier": null, 
+  "experimental_strategy": null, 
+  "*file_name": null, 
+  "cell_type": null, 
+  "*type": "slide_image", 
+  "protocol_used": null, 
+  "object_id": null, 
+  "*file_size": null, 
+  "cell_count": null, 
+  "*md5sum": null, 
+  "urls": null
+}

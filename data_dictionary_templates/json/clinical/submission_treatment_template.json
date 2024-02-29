@@ -1,0 +1,17 @@
+{
+  "treatment_type": null, 
+  "therapeutic_agents": null, 
+  "days_to_treatment_end": null, 
+  "days_to_treatment": null, 
+  "days_to_treatment_start": null, 
+  "treatment_or_therapy": null, 
+  "treatment_outcome": null, 
+  "diagnoses": {
+    "submitter_id": null
+  }, 
+  "*submitter_id": null, 
+  "treatment_anatomic_site": null, 
+  "*type": "treatment", 
+  "project_id": null, 
+  "treatment_intent_type": null
+}

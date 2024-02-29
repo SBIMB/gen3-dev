@@ -1,0 +1,11 @@
+{
+  "consent_codes": null, 
+  "primary_site": null, 
+  "*submitter_id": null, 
+  "*type": "case", 
+  "*experiments": {
+    "submitter_id": null
+  }, 
+  "disease_type": null, 
+  "project_id": null
+}

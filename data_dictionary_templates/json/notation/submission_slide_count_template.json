@@ -1,0 +1,20 @@
+{
+  "relative_nuclear_intensity": null, 
+  "relative_cytokeratin_intensity": null, 
+  "biomarker_signal": null, 
+  "run_name": null, 
+  "*slides": {
+    "submitter_id": null
+  }, 
+  "frame_identifier": null, 
+  "cell_identifier": null, 
+  "er_localization": null, 
+  "relative_er_intensity": null, 
+  "cell_count": null, 
+  "*submitter_id": null, 
+  "relative_nuclear_size": null, 
+  "cell_type": null, 
+  "*type": "slide_count", 
+  "project_id": null, 
+  "ck_signal": null
+}
