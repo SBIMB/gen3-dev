@@ -540,3 +540,26 @@ As an example, suppose there exists a program called `program1`. Then visiting t
 and a green banner with **Succeeded: 200** will be displayed.   
 
 ![Successful Project Creation](public/assets/images/successful-project-creation.png "Successful Project Creation") 
+
+#### MinIO for Local Buckets
+Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exist several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html). There are three new resources that we'll create, and we'll need to modify the ingress file, `revproxy-dev.yaml`, to add the `minio` paths. The three resources to be created are:
+- [minio-pvc](minio/minio-pvc.yaml)
+- [minio-deployment](minio/minio-deployment.yaml)
+- [minio-service](minio/minio-service.yaml)
+The ingress file, `revproxy-dev.yaml`, needs to be modified to add the `minio` paths:
+```yaml
+      - backend:
+          service:
+            name: minio-service
+            port:
+              number: 9000
+        path: /api/(.*)
+        pathType: ImplementationSpecific
+      - backend:
+          service:
+            name: minio-service
+            port:
+              number: 9001
+        path: /minio/(.*)
+        pathType: ImplementationSpecific
+```

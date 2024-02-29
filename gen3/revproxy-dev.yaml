@@ -24,5 +24,19 @@ spec:
               number: 80
         path: /
         pathType: Prefix
+      - backend:
+          service:
+            name: minio-service
+            port:
+              number: 9000
+        path: /api/(.*)
+        pathType: ImplementationSpecific
+      - backend:
+          service:
+            name: minio-service
+            port:
+              number: 9001
+        path: /minio/(.*)
+        pathType: ImplementationSpecific
   tls:
   - secretName: cloud08-tls-secret
