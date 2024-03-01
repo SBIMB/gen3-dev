@@ -11,5 +11,23 @@ spec:
   accessModes:
   - ReadWriteOnce # ReadWriteOncePod is recommended for production
   hostPath: # MinIO generally recommends using locally-attached volumes
-    path: $HOME/workspace/gen3-volume # Specify a path to a local drive or volume on the Kubernetes worker node
+    path: /$HOME/workspace/gen3-volume # Specify a path to a local drive or volume on the Kubernetes worker node
     type: DirectoryOrCreate # The path to the last directory must exist
+
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: edge-pv-class
+  local:
+    path: /data/test
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: ches-worker
+          operator: In
+          values:
+          - "true"
