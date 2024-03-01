@@ -575,12 +575,21 @@ kubectl create -f minio/minio-pvc.yaml
 kubectl create -f minio/minio-deployment.yaml
 kubectl create -f minio/minio-service.yaml
 ```
+After a few minutes, the pods inside the `minio-system` namespace should all be running and ready.   
+![MinIO System Workloads](public/assets/images/minio-system-workloads.png "MinIO System Workloads")   
 
-The ingress file, `revproxy-dev.yaml`, needs to be modified to add the `minio` paths:
+The `minio-service` should be accessible on the following url: `http://<ip-address>:<nodePort>/minio`. 
+![MinIO Login Page](public/assets/images/minio-login.png "MinIO Login")   
+
+Once logged in, a bucket, `gen3-local-bucket`, can be created using the UI.
+![MinIO Gen3 Local Bucket](public/assets/images/minio-gen3-local-bucket.png "MinIO Gen3 Local Bucket")   
+
+To expose `minio` on HTTPS, we'll need to modify the ingress file, `revproxy-dev.yaml`, by adding the `minio` paths:
 ```yaml
       - backend:
           service:
             name: minio-service
+            namespace: minio-system
             port:
               number: 9000
         path: /minio-api/(.*)
@@ -588,6 +597,7 @@ The ingress file, `revproxy-dev.yaml`, needs to be modified to add the `minio` p
       - backend:
           service:
             name: minio-service
+            namespace: minio-system
             port:
               number: 9001
         path: /minio/(.*)

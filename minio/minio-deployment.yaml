@@ -10,8 +10,6 @@ spec:
   selector:
     matchLabels:
       app: minio
-  # strategy:
-  #   type: Recreate
   template:
     metadata:
       name: minio
@@ -22,7 +20,6 @@ spec:
         kubernetes.io/hostname: cloud08
       containers:
       - name: minio
-        # image: docker.io/bitnami/minio:2022
         image: quay.io/minio/minio:latest
         command:
         - /bin/bash
@@ -36,16 +33,10 @@ spec:
           hostPort: 9001
         imagePullPolicy: IfNotPresent
         env:
-        # - name: MINIO_BROWSER_REDIRECT_URL
-        #   value: "https://cloud08.core.wits.ac.za/minio/"
         - name: MINIO_ROOT_USER
           value: "minio_root_user"
         - name: MINIO_ROOT_PASSWORD
           value: "minio_root_password"
-        # - name: MINIO_DEFAULT_BUCKETS
-        #   value: "images"
-        # - name: BASE_HREF
-        #   value: /minio/   
         livenessProbe:
           httpGet:
             path: /minio/health/live
