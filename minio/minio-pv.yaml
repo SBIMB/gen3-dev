@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio-pv
+  labels:
+    type: local
+spec:
+  storageClassName: local-path
+  capacity:
+    storage: 10Gi
+  accessModes:
+  - ReadWriteOnce # ReadWriteOncePod is recommended for production
+  hostPath: # MinIO generally recommends using locally-attached volumes
+    path: $HOME/workspace/gen3-volume # Specify a path to a local drive or volume on the Kubernetes worker node
+    type: DirectoryOrCreate # The path to the last directory must exist

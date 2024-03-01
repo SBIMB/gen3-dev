@@ -565,7 +565,7 @@ kubectl get all -n minio-dev
 ```
 ![MinIO Workloads](public/assets/images/minio-workloads.png "MinIO Workloads") 
 
-However, we will go with a simpler setup. There are three new resources that we'll create, and we'll need to modify the ingress file, `revproxy-dev.yaml`, to add the `minio` paths. The three resources to be created are:
+However, we will go with a simpler setup. There are four new resources that we'll create, and we'll need to modify the ingress file, `revproxy-dev.yaml`, to add the `minio` paths. The four resources to be created are:
 - [minio-pvc](minio/minio-pvc.yaml)
 - [minio-deployment](minio/minio-deployment.yaml)
 - [minio-service](minio/minio-service.yaml)   
@@ -574,14 +574,18 @@ kubectl create namespace minio-system
 kubectl create -f minio/minio-pvc.yaml
 kubectl create -f minio/minio-deployment.yaml
 kubectl create -f minio/minio-service.yaml
+kubectl create -f minio/minio-pv.yaml
 ```
-After a few minutes, the pods inside the `minio-system` namespace should all be running and ready.   
+After a few minutes, the pods inside the `minio-system` namespace should all be running and ready.    
+
 ![MinIO System Workloads](public/assets/images/minio-system-workloads.png "MinIO System Workloads")   
 
-The `minio-service` should be accessible on the following url: `http://<ip-address>:<nodePort>/minio`. 
+The `minio-service` should be accessible on the following url: `http://<ip-address>:<nodePort>/minio`.    
+
 ![MinIO Login Page](public/assets/images/minio-login.png "MinIO Login")   
 
-Once logged in, a bucket, `gen3-local-bucket`, can be created using the UI.
+Once logged in, a bucket, `gen3-local-bucket`, can be created using the UI.   
+
 ![MinIO Gen3 Local Bucket](public/assets/images/minio-gen3-local-bucket.png "MinIO Gen3 Local Bucket")   
 
 To expose `minio` on HTTPS, we'll need to modify the ingress file, `revproxy-dev.yaml`, by adding the `minio` paths:
