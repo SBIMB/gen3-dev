@@ -47,9 +47,9 @@ spec:
         # - name: BASE_HREF
         #   value: /minio/
         - name: MINIO_ACCESS_KEY
-          value: "minio"
+          value: "minio_access_key"
         - name: MINIO_SECRET_KEY
-          value: "minio"
+          value: "minio_secret_key"
         livenessProbe:
           httpGet:
             path: /minio/health/live
