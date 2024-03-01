@@ -58,7 +58,7 @@ spec:
             cpu: "2000m"
         volumeMounts:
         - name: minio-storage
-          mountPath: /$HOME/workspace/
+          mountPath: /data
       restartPolicy: Always
       volumes:
       - name: minio-storage
