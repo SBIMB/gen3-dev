@@ -38,18 +38,14 @@ spec:
         env:
         # - name: MINIO_BROWSER_REDIRECT_URL
         #   value: "https://cloud08.core.wits.ac.za/minio/"
-        # - name: MINIO_ROOT_USER
-        #   value: "minio_root_user"
-        # - name: MINIO_ROOT_PASSWORD
-        #   value: "minio_root_password"
+        - name: MINIO_ROOT_USER
+          value: "minio_root_user"
+        - name: MINIO_ROOT_PASSWORD
+          value: "minio_root_password"
         # - name: MINIO_DEFAULT_BUCKETS
         #   value: "images"
         # - name: BASE_HREF
-        #   value: /minio/
-        - name: MINIO_ACCESS_KEY
-          value: "minio_access_key"
-        - name: MINIO_SECRET_KEY
-          value: "minio_secret_key"
+        #   value: /minio/   
         livenessProbe:
           httpGet:
             path: /minio/health/live
