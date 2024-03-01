@@ -2,6 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: minio-pvc
+  namespace: minio-system
 spec:
   accessModes:
   - ReadWriteOnce # ReadWriteOncePod is recommended for production

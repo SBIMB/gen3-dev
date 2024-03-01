@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: minio
+  namespace: minio-system
   labels:
     app: minio
 spec:
@@ -9,10 +10,11 @@ spec:
   selector:
     matchLabels:
       app: minio
-  strategy:
-    type: Recreate
+  # strategy:
+  #   type: Recreate
   template:
     metadata:
+      name: minio
       labels:
         app: minio
     spec:
@@ -22,35 +24,55 @@ spec:
       - name: minio
         # image: docker.io/bitnami/minio:2022
         image: quay.io/minio/minio:latest
-        args:
-        - minio server /data --console-address :9001
         command:
         - /bin/bash
         - -c
+        args:
+        - minio server /data --console-address :9001
         ports:
         - containerPort: 9000
           hostPort: 9000
         - containerPort: 9001
           hostPort: 9001
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
-        - name: MINIO_BROWSER_REDIRECT_URL
-          value: "https://cloud08.core.wits.ac.za/minio/"
-        - name: MINIO_ROOT_USER
-          value: "admin"
-        - name: MINIO_ROOT_PASSWORD
-          value: "admin"
-        - name: MINIO_DEFAULT_BUCKETS
-          value: "images"
-        - name: BASE_HREF
-          value: /minio/
+        # - name: MINIO_BROWSER_REDIRECT_URL
+        #   value: "https://cloud08.core.wits.ac.za/minio/"
+        # - name: MINIO_ROOT_USER
+        #   value: "minio_root_user"
+        # - name: MINIO_ROOT_PASSWORD
+        #   value: "minio_root_password"
+        # - name: MINIO_DEFAULT_BUCKETS
+        #   value: "images"
+        # - name: BASE_HREF
+        #   value: /minio/
         - name: MINIO_ACCESS_KEY
-          value: "minio_access_key"
+          value: "minio"
         - name: MINIO_SECRET_KEY
-          value: "minio_secret_key"
+          value: "minio"
+        livenessProbe:
+          httpGet:
+            path: /minio/health/live
+            port: 9000
+          initialDelaySeconds: 120
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /minio/health/ready
+            port: 9000
+          initialDelaySeconds: 120
+          periodSeconds: 20
+        resources:
+          requests:
+            memory: "1200Mi"
+            cpu: "1500m"
+          limits:
+            memory: "1500Mi"
+            cpu: "2000m"
         volumeMounts:
         - name: minio-storage
           mountPath: /data
+      restartPolicy: Always
       volumes:
       - name: minio-storage
         persistentVolumeClaim:

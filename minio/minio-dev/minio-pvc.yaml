@@ -1,0 +1,17 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: minio-dev
+  namespace: "minio-dev"
+  labels:
+    app.kubernetes.io/instance: minio-dev
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: minio
+    app.kubernetes.io/version: 2024.2.26
+    helm.sh/chart: minio-13.7.0
+spec:
+  accessModes:
+  - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "8Gi"

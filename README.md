@@ -254,12 +254,7 @@ kubectl create -f cert-manager/staging-issuer.yaml
 kubectl create -f cert-manager/prod-issuer.yaml
 ```
 
-The email address specified inside the two manifests will be used to register a staging and prod ACME account, and the respective private keys of each ACME account should be stored inside the corresponding Kubernetes secrets called `letsencrypt-staging` and `letsencrypt-prod`. The command for generating a Kubernetes secret is:
-```bash
-  kubectl create secret generic letsencrypt-staging --from-literal=acme=acmeprivatekeyforstaging
-  kubectl create secret generic letsencrypt-prod --from-literal=acme=acmeprivatekeyforprod
-```
-However, these secrets need not be created manually, since the `staging-issuer.yaml` and `prod-issuer.yaml` files would create the secrets. This can be seen with:
+The email address specified inside the two manifests will be used to register a staging and prod ACME account, and the respective private keys of each ACME account should be stored inside the corresponding Kubernetes secrets called `letsencrypt-staging` and `letsencrypt-prod`. These secrets can be seen with:
 ```bash
 kubectl get secrets -n cert-manager
 ```
@@ -273,19 +268,12 @@ The certificates will only be created after updating and annotating the ingress 
 ```bash
 cert-manager.io/cluster-issuer: "letsencrypt-staging"
 ```
-or the following annotation (when ready for use):
-```bash
-cert-manager.io/cluster-issuer: "letsencrypt-prod"
-```
 The ingress manifest needs to be modified such that the following block appears underneath the `spec`:
 ```bash
   tls:
   - hosts:
     - cloud08.core.wits.ac.za
-    secretName: gen3-certs
-  - hosts:
-    - cloud08.core.wits.ac.za
-    secretName: echo-tls
+    secretName: cloud08-tls-secret
 ```
 After editing the ingress manifest, the certificate creation events can be seen when running the command:
 ```bash
@@ -295,6 +283,18 @@ Details of the certificate can be seen with:
 ```bash
 kubectl describe certificate
 ```
+The following command can be run to test if the connection to HTTPS is possible:
+```bash
+wget --save-headers -O- cloud08.core.wits.ac.za
+```
+The response should state that the domain name has been resolved and a connection has been established, however, there should be an error stating that the certificate could not be verified and that the flag `--no-check-certificate` can be used. If such is the case, then it's time to change the annotation in the ingress to `letsencrypt-prod`:
+```bash
+cert-manager.io/cluster-issuer: "letsencrypt-prod"
+```
+It may take a few minutes for the certificate to be issued.    
+
+**NOTE**: we are still having some issues, since the `cloud08-tls-secret` references a self-signed certificate, which is not trusted by the browser. The process of creating the `cloud08-tls-secret` has been documented over [here](documentation/debugging_networking_issues.md).   
+
 ### ArgoCD
 [ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is a useful GitOps tool that allows for continuous delivery by automating application deployments to Kubernetes. It is open-source. Automated rollbacks, automatic synchronisation of deployed applications with a Git repository, and a web-based UI to manage the deployed applications are some of the features that are offered by ArgoCD.   
 
@@ -542,17 +542,40 @@ and a green banner with **Succeeded: 200** will be displayed.
 ![Successful Project Creation](public/assets/images/successful-project-creation.png "Successful Project Creation") 
 
 #### MinIO for Local Buckets
-Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exist several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html). There are three new resources that we'll create, and we'll need to modify the ingress file, `revproxy-dev.yaml`, to add the `minio` paths. The three resources to be created are:
+Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exist several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html).   
+To get the `minio-operator`, use the following command (adjust this command according to the version of choice):
+```bash
+https://github.com/minio/operator/releases/download/v5.0.12/kubectl-minio_5.0.12_linux_amd64
+```
+However, the `minio-operator` doesn't support the single-node-single-drive architecture, so we will not be using it. An An alternative is to use a Helm chart to install `minio`:
+```bash
+helm install minio-dev oci://registry-1.docker.io/bitnamicharts/minio \
+--namespace minio-dev --create-namespace
+```
+The templates for this chart can be found inside the repository in the `/minio/minio-dev/` directory. The templates can be retrieved by running:
+```bash
+helm install minio-dev oci://registry-1.docker.io/bitnamicharts/minio \
+helm install minio-dev oci://registry-1.docker.io/bitnamicharts/minio \
+--namespace minio-dev --create-namespace \
+--dry-run --debug
+```
+If the Helm installation is a success, the workloads in the `minio-dev` namespace can be seen with:
+```bash
+kubectl get all -n minio-dev
+```
+![MinIO Workloads](public/assets/images/minio-workloads.png "MinIO Workloads") 
+
+However, we will go with a simpler setup. There are three new resources that we'll create, and we'll need to modify the ingress file, `revproxy-dev.yaml`, to add the `minio` paths. The three resources to be created are:
 - [minio-pvc](minio/minio-pvc.yaml)
 - [minio-deployment](minio/minio-deployment.yaml)
 - [minio-service](minio/minio-service.yaml)   
-
-To create the `minio` resources in the `default` namespace, run the following commands:
 ```bash
+kubectl create namespace minio-system
 kubectl create -f minio/minio-pvc.yaml
 kubectl create -f minio/minio-deployment.yaml
 kubectl create -f minio/minio-service.yaml
 ```
+
 The ingress file, `revproxy-dev.yaml`, needs to be modified to add the `minio` paths:
 ```yaml
       - backend:
@@ -560,7 +583,7 @@ The ingress file, `revproxy-dev.yaml`, needs to be modified to add the `minio` p
             name: minio-service
             port:
               number: 9000
-        path: /api/(.*)
+        path: /minio-api/(.*)
         pathType: ImplementationSpecific
       - backend:
           service:
