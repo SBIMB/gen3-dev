@@ -13,6 +13,7 @@ authz:
     - services.sheepdog-admin
     - data_upload
     - ReganTestProject_submitter
+    - gen3-project-501_submitter
     users:
     - a0045661@wits.ac.za
 
@@ -49,6 +50,11 @@ authz:
       - name: projects
         subresources:
         - name: ReganTestProject
+    - name: gen3-program-501
+      subresources:
+      - name: projects
+        subresources:
+        - name: P501
 
   policies:
   - id: workspace
@@ -98,6 +104,14 @@ authz:
     - storage_writer
     resource_paths:
     - /programs
+  - id: gen3-project-501_submitter
+    role_ids:
+    - creator
+    - updater
+    - deleter
+    - storage_writer
+    resource_paths:
+    - /programs/gen3-program-501/projects/P501
 
   roles:
   - id: file_uploader
@@ -200,12 +214,14 @@ users:
       email: regan.cannell@wits.ac.za
     policies:
     - ReganTestProject_submitter
+    - gen3-project-501_submitter
   regancannell@gmail.com:
     tags:
       name: Regan Cannell
       email: regancannell@gmail.com
     policies:
     - ReganTestProject_submitter
+    - gen3-project-501_submitter
 
 cloud_providers: {}
 groups: {}

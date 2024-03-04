@@ -539,7 +539,9 @@ As an example, suppose there exists a program called `program1`. Then visiting t
 ```
 and a green banner with **Succeeded: 200** will be displayed.   
 
-![Successful Project Creation](public/assets/images/successful-project-creation.png "Successful Project Creation") 
+![Successful Project Creation](public/assets/images/successful-project-creation.png "Successful Project Creation")    
+
+To test the uploading of data, the data needs to match the data dictionary. There exists a repository called [data-simulator](https://github.com/uc-cdis/data-simulator) that can be used for generating mock, or test, data.
 
 #### MinIO for Local Buckets
 Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exist several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html).   
@@ -594,6 +596,7 @@ kubectl exec --stdin --tty minio-676bd87f88-8wxdx -n minio-system -- bash
 ```   
 
 ![Uploaded files in /data/ directory](public/assets/images/uploaded-files-in-data-directory.png "Uploaded files in /data/ directory")   
+The files will be stored in the directory `/var/lib/rancher/k3s/storage`.   
 
 To expose `minio` on HTTPS, we'll need to modify the ingress file, `revproxy-dev.yaml`, by adding the `minio` paths:
 ```yaml
