@@ -3,3 +3,5 @@ strict-local.sh
 hosts.txt
 resolv.conf
 gen3/values.dev.yaml
+gen3/cloud08-tls-secret.yaml
+gen3/cloud08-tls-secret.old.yaml

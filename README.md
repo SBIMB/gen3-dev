@@ -591,7 +591,8 @@ Once logged in, a bucket, `gen3-local-bucket`, can be created using the UI.
 We can use the console (or UI) to upload test files to the `gen3-local-bucket`. These files should then be stored inside the `/data/gen3-local-bucket/` directory of the `minio` pod. To get inside the pod's container, run:
 ```bash
 kubectl exec --stdin --tty minio-676bd87f88-8wxdx -n minio-system -- bash
-```
+```   
+
 ![Uploaded files in /data/ directory](public/assets/images/uploaded-files-in-data-directory.png "Uploaded files in /data/ directory")   
 
 To expose `minio` on HTTPS, we'll need to modify the ingress file, `revproxy-dev.yaml`, by adding the `minio` paths:
