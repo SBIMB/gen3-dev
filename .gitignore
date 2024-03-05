@@ -5,3 +5,7 @@ resolv.conf
 gen3/values.dev.yaml
 gen3/cloud08-tls-secret.yaml
 gen3/cloud08-tls-secret.old.yaml
+gen3/cloud08.core.wits.ac.za.crt
+gen3/cloud08.core.wits.ac.za.csr
+gen3/cloud08.core.wits.ac.za.key
+gen3/cloud08.core.wits.ac.za.pem

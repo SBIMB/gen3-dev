@@ -502,9 +502,17 @@ kubectl logs <arborist-pod-name>
 
 To authorise the `gen3-client` for uploading to the data commons, the following command needs to be run:
 ```bash
-gen3-client configure --profile=regan-demo --cred=credentials.json --apiendpoint=https://cloud08.core.wits.ac.za/
+gen3-client configure --profile=gen3-dev --cred=credentials.json --apiendpoint=https://cloud08.core.wits.ac.za/
 ```
-If this command does not work, then we can try other methods. The goal here is to obtain an access token. This access token will be used as a bearer token under the _Authorization_ header when making requests to the data commons. To get an access token, a POST request needs to be made to this endpoint:
+This command might fail due to certificate issues. It may complain that the self-signed certificate is not trusted. To trust the self-signed certificate, copy the contents of `cloud08.core.wits.ac.za.key` and `cloud08.core.wits.ac.za.crt` to `cloud08.core.wits.ac.za.pem`, and have this `.pem` file moved to the `/usr/local/share/certificates/` directory. Then when the following command is run
+```bash
+sudo update-ca-certificates
+```
+then the self-signed certificate will be trusted.   
+
+![gen3-client Authorised](public/assets/images/gen3-client-authorised.png "gen3-client Authorised") 
+
+If the `gen3-client` still does not work, then we can try other methods (use the API directly). The goal here is to obtain an access token. This access token will be used as a bearer token under the _Authorization_ header when making requests to the data commons. To get an access token, a POST request needs to be made to this endpoint:
 ```bash
 https://cloud08.core.wits.ac.za/user/credentials/cdis/access_token
 ```
