@@ -16,6 +16,7 @@ authz:
     - gen3-project-501_submitter
     users:
     - a0045661@wits.ac.za
+    - regancannell@gmail.com
 
   # can create/update/delete indexd records
   - name: indexd_admins
@@ -23,6 +24,7 @@ authz:
     - indexd_admin
     users:
     - a0045661@wits.ac.za
+    - regancannell@gmail.com
 
   resources:
   - name: workspace
@@ -211,7 +213,7 @@ users:
   a0045661@wits.ac.za:
     tags:
       name: Regan Cannell
-      email: regan.cannell@wits.ac.za
+      email: a0045661@wits.ac.za
     policies:
     - ReganTestProject_submitter
     - gen3-project-501_submitter
