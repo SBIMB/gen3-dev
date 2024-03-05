@@ -1,0 +1,10 @@
+{
+    "type": "keyword",
+    "keyword_name": "genetics",
+    "projects": [
+      {
+        "code": "P502"
+      }
+    ],
+    "submitter_id": "pers_502"
+  }

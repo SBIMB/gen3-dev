@@ -1,0 +1,10 @@
+{
+    "type": "acknowledgement",
+    "projects": [
+      {
+        "code": "P502"
+      }
+    ],
+    "acknowledgee": "sbimb",
+    "submitter_id": "pers_502"
+  }

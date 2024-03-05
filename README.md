@@ -545,7 +545,13 @@ and a green banner with **Succeeded: 200** will be displayed.
 
 ![Successful Project Creation](public/assets/images/successful-project-creation.png "Successful Project Creation")    
 
-To test the uploading of data, the data needs to match the data dictionary. There exists a repository called [data-simulator](https://github.com/uc-cdis/data-simulator) that can be used for generating mock, or test, data.
+The url for adding nodes to the project is found at `https://cloud08.core.wits.ac.za/<program_name>/<project_id>`. The `administrative` node data can be added directly by filling in the form and submitting in JSON format.   
+
+To test the uploading of data, the data needs to match the data dictionary. There exists a repository called [data-simulator](https://github.com/uc-cdis/data-simulator) that can be used for generating mock, or test, data.   
+
+When trying to upload data using the submission endpoint, an error is thrown by the `sheepdog-deployment`. The error is about parsing JSON. We need to investigate this error further.
+
+![JSON Parse Error](public/assets/images/sheepdog-parse-json-error.png "JSON Parse Error")    
 
 #### MinIO for Local Buckets
 Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exist several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html).   
