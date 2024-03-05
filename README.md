@@ -490,7 +490,11 @@ kubectl create configmap fence --from-file user.yaml
 # create a new job from the useryaml-job.yaml manifest found in this repo
 kubectl apply -f useryaml-job.yaml
 ```
-To see if the roles and policies have been updated, the logs from the `arborist-deployment` can be checked with
+To see if the roles and policies have been updated, restart the `arborist` deployment with
+```bash
+kubectl rollout restart deployment arborist-deployment
+```
+and then check the logs from the `arborist-deployment` with
 ```bash
 kubectl logs <arborist-pod-name>
 ```
