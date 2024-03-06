@@ -553,7 +553,7 @@ and a green banner with **Succeeded: 200** will be displayed.
 
 ![Successful Project Creation](public/assets/images/successful-project-creation.png "Successful Project Creation")    
 
-The url for adding nodes to the project is found at `https://cloud08.core.wits.ac.za/<program_name>/<project_id>`. The `administrative` node data can be added directly by filling in the form and submitting in JSON format.   
+The url for adding nodes to the project is found at `https://cloud08.core.wits.ac.za/<program_name>/<project_code>`. The `administrative` node data can be added directly by filling in the form and submitting in JSON format.   
 
 To test the uploading of data, the data needs to match the data dictionary. There exists a repository called [data-simulator](https://github.com/uc-cdis/data-simulator) that can be used for generating mock, or test, data.   
 
@@ -561,8 +561,16 @@ When trying to upload data using the submission endpoint, an error is thrown by 
 
 ![JSON Parse Error](public/assets/images/sheepdog-parse-json-error.png "JSON Parse Error")    
 
+When using a tool like Postman to make a PUT request to the submission endpoint (where program name is `gen3Program502` and project code is `P502`), i.e.
+```bash
+https://cloud08.core.wits.ac.za/api/v0/submission/gen3Program502/P502
+```
+the request is successful when the body is submitted as raw JSON. However, when using a JSON file, the parsing error persists.   
+
+![Successful PUT Request with Raw JSON](public/assets/images/successful-put-request.png "Successful PUT Request with Raw JSON")    
+
 #### MinIO for Local Buckets
-Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exist several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html).   
+Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exists several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html).   
 To get the `minio-operator`, use the following command (adjust this command according to the version of choice):
 ```bash
 https://github.com/minio/operator/releases/download/v5.0.12/kubectl-minio_5.0.12_linux_amd64
