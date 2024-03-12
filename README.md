@@ -514,7 +514,7 @@ For all S3 actions to be allowed for a user, the following policy can be used:
             "Sid": "Gen3Upload",
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::938659344479:user/gen3-user"
+                "AWS": "arn:aws:iam::someId:user/gen3-user"
             },
             "Action": "s3:*",
             "Resource": [
@@ -533,8 +533,9 @@ If the `aws` CLI tool is installed and configured correctly, then a list of file
 ```bash
 aws s3 cp local-folder/folder-where-file-exists s3://gen3-bucket/ --recursive
 ```
+If these `aws` CLI commands work properly, then it is safe to assume that the bucket and credentials are correct and working.   
 
-If a **403 Unauthorized** error is returned when trying to upload a file, it is likely that the `usersync` job that ran during the Helm deployment did not update the `useryaml` config map to have the necessary permissions for uploading. This can be remedied manually by doing the following:   
+Regarding Gen3, if a **403 Unauthorized** error is returned when trying to upload a file, it is likely that the `usersync` job that ran during the Helm deployment did not update the `useryaml` config map to have the necessary permissions for uploading. This can be remedied manually by doing the following:   
 ```bash
 # delete the old job that ran during the Helm deployment
 kubectl delete job useryaml
