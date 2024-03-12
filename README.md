@@ -450,7 +450,6 @@ fence:
       # Name of the actual s3 bucket
       gen3-bucket:
         cred: "gen3-user"
-        endpoint_url: "s3.us-east-1.amazonaws.com"
         region: us-east-1
     # This is important for data upload.
     DATA_UPLOAD_BUCKET: "gen3-bucket"
@@ -629,13 +628,116 @@ the request is successful when the body is submitted as raw JSON. However, when 
 
 ![Successful PUT Request with Raw JSON](public/assets/images/successful-put-request.png "Successful PUT Request with Raw JSON")    
 
-Uploading/Submitting is successful when using raw JSON or when using the UI directly. However, the files remain in a `Generating...` state in the UI. This is probably due to some database record not being updated when the upload occures. The metadata would then need to be manually updated.   
+Uploading/Submitting is successful when using raw JSON or when using the UI directly. However, the files remain in a `Generating...` state in the UI. This is probably due to some database record not being updated when the upload occurs. The metadata would then need to be manually updated.   
 
 ![Gen3 Files in Generating State](public/assets/images/gen3-files-in-generating-state.png "Gen3 Files in Generating State")  
 
-When uploading with the `gen3-client`, the metadata will be updated when the upload occurs. However, the `gen3-client` continues to fail to upload a file to the S3 bucket. The error message concerns some presigned url. More investigation and troubleshooting is required.   
+To successfully upload with the `gen3-client`, and have the metadata updated when the upload occurs, the `ssjdispatcher` needs to be configured to work with Amazon SQS and SNS, respectively. 
 
-![Presigned URL Upload Error](public/assets/images/presigned-url-upload-error.png "Presigned URL Upload Error")    
+In the Amazon console, an SNS topic (let's call it `ssj-topic`) should be created and have the following access policy:
+```json
+{
+  "Version": "2012-10-17",
+  "Id": "example-ID",
+  "Statement": [
+    {
+      "Sid": "Example SNS topic policy",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "s3.amazonaws.com"
+      },
+      "Action": [
+        "SNS:Subscribe",
+        "SNS:Receive",
+        "SNS:Publish",
+        "SNS:ListSubscriptionsByTopic",
+        "SNS:GetTopicAttributes"
+      ],
+      "Resource": "arn:aws:sns:us-east-1:ownerId:ssj-topic",
+      "Condition": {
+        "StringEquals": {
+          "aws:SourceAccount": "ownerId"
+        },
+        "ArnLike": {
+          "aws:SourceArn": "arn:aws:s3:*:*:gen3-bucket"
+        }
+      }
+    }
+  ]
+}
+```
+The SNS topic is configured to wait for an upload event from the S3 bucket, `gen3-bucket`.
+
+In the Amazon console, a queue (let's call it `Gen3Queue`) should be created and have the following access policy:
+```json
+{
+  "Version": "2012-10-17",
+  "Id": "__default_policy_ID",
+  "Statement": [
+    {
+      "Sid": "__owner_statement",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "SQS:*",
+      "Resource": "arn:aws:sqs:us-east-1:ownerId:Gen3Queue",
+      "Condition": {
+        "ArnEquals": {
+          "aws:SourceArn": "arn:aws:sns:us-east-1:ownerId:ssj-topic"
+        }
+      }
+    }
+  ]
+}
+```
+The SQS queue receives notifications from the SNS topic. When an upload occurs with the `gen3-client`, the message received by the queue should trigger the `ssjdispatcher` to create a Kubernetes job that will update the index of the uploaded file inside the `metadata` database (I think this is what's going on). Consequently, some additional updates needs to be made to some of the `gen3` resources.   
+
+Create a file called `credentials.json` with the following content:
+```json
+{
+    "AWS": {
+        "region": "us-east-1",
+        "aws_access_key_id": "",
+        "aws_secret_access_key": ""
+    },
+    "SQS": {
+        "url": "https://sqs.us-east-1.amazonaws.com/938659344479/Gen3Queue"
+    },
+    "JOBS": [
+        {
+            "name": "indexing",
+            "pattern": "s3://gen3-bucket/*",
+            "imageConfig": {
+                "url": "http://indexd-service/index",
+                "username": "fence",
+                "password": "fence password taken from indexd-service-creds secret",
+                "metadataService": {
+                    "url": "http://revproxy-service/mds",
+                    "username": "gateway",
+                    "password": "gateway password taken from metadata.env inside metadata-g3auto secret"
+                }
+            },
+            "RequestCPU": "500m",
+            "RequestMem": "0.5Gi"
+        }
+    ]
+}
+```
+The last thing to be done is to manually update the image referenced inside the `manifest-ssjdispatcher` config map:
+```bash 
+kubectl edit cm manifest-ssjdispatcher
+```
+Replace the `data` field with the following:
+```yaml
+data:
+  job_images: |-
+    {
+      "indexing": "quay.io/cdis/indexs3client:2022.08"
+    }
+```
+Now whenever a file is uploaded to the `gen3-bucket`, a message will be sent to the SNS and SQS services that will then trigger the creation of a job which will then update the `metadata` database with the relevant metadata.   
+![Uploaded File in READY State](public/assets/images/uploaded-file-in-ready-state.png "Uploaded File in READY State")  
 
 #### MinIO for Local Buckets
 Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exists several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html).   
@@ -695,3 +797,5 @@ kubectl exec --stdin --tty minio-676bd87f88-8wxdx -n minio-system -- bash
 
 ![Uploaded files in /data/ directory](public/assets/images/uploaded-files-in-data-directory.png "Uploaded files in /data/ directory")   
 The files will be stored in the directory `/var/lib/rancher/k3s/storage`.   
+
+"aws:SourceArn": "arn:aws:sns:us-east-1:938659344479:ssj-topic"

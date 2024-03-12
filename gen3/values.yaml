@@ -79,15 +79,12 @@ fence:
       # Name of the actual s3 bucket
       gen3-bucket:
         cred: "gen3-user"
-        endpoint_url: "s3.us-east-1.amazonaws.com"
         region: us-east-1
       gen3-user-bucket:
         cred: "gen3-user"
-        endpoint_url: "s3.us-east-1.amazonaws.com"
         region: us-east-1
       gen3-local-bucket:
         cred: "minio-user"
-        endpoint_url: "http://cloud08.core.wits.ac.za:9001"
         MINIO_ROOT_USER: "",
         MINIO_ROOT_PASSWORD: ""
     # This is important for data upload.
@@ -280,6 +277,30 @@ ssjdispatcher:
   image:
     repository:
     tag:
+  # -- (map) Values for ssjdispatcher secret.
+  ssjcreds:
+    # -- (string) Sqs queue to monitor.
+    sqsUrl: ""
+    # -- (string) Name of the ssj job.
+    jobName: "indexing"
+    # -- (string) URL upload pattern that will trigger an event in S3 to send a message to SQS.
+    jobPattern: "s3://gen3-bucket/*"
+    # -- (string) Indexd service URL.
+    jobUrl: "http://indexd-service/index"
+    # -- (string) Name of the user the job will run with.
+    jobUser: "ssj"
+    # -- (string) Password for the job.
+    jobPassword: "replace_with_password"
+    # -- (string) The amount of CPU the job requests.
+    jobRequestCpu: "500m"
+    # -- (string) The amount of memory the job requests.
+    jobRequestMem: "0.5Gi"
+    # -- (string) URL to reach metadata service endpoint.
+    metadataserviceUrl: "http://revproxy-service/mds"
+    # -- (string) Username for the metadata service.
+    metadataserviceUsername: "gateway"
+    # -- (string) Password for the metadata service.
+    metadataservicePassword: "replace_with_password"
 
 wts:
   enabled: true
