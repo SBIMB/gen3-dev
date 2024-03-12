@@ -627,7 +627,12 @@ https://cloud08.core.wits.ac.za/api/v0/submission/gen3Program502/P502
 the request is successful when the body is submitted as raw JSON. However, when using a JSON file, the parsing error persists.   
 
 ![Successful PUT Request with Raw JSON](public/assets/images/successful-put-request.png "Successful PUT Request with Raw JSON")    
-The `gen3-client` continues to fail to upload a file to the S3 bucket. The error message concerns some presigned url. More investigation and troubleshooting is required.   
+
+Uploading/Submitting is successful when using raw JSON or when using the UI directly. However, the files remain in a `Generating...` state in the UI. This is probably due to some database record not being updated when the upload occures. The metadata would then need to be manually updated.   
+
+![Gen3 Files in Generating State](public/assets/images/gen3-files-in-generating-state.png "Gen3 Files in Generating State")  
+
+When uploading with the `gen3-client`, the metadata will be updated when the upload occurs. However, the `gen3-client` continues to fail to upload a file to the S3 bucket. The error message concerns some presigned url. More investigation and troubleshooting is required.   
 
 ![Presigned URL Upload Error](public/assets/images/presigned-url-upload-error.png "Presigned URL Upload Error")    
 
@@ -689,23 +694,3 @@ kubectl exec --stdin --tty minio-676bd87f88-8wxdx -n minio-system -- bash
 
 ![Uploaded files in /data/ directory](public/assets/images/uploaded-files-in-data-directory.png "Uploaded files in /data/ directory")   
 The files will be stored in the directory `/var/lib/rancher/k3s/storage`.   
-
-To expose `minio` on HTTPS, we'll need to modify the ingress file, `revproxy-dev.yaml`, by adding the `minio` paths:
-```yaml
-      - backend:
-          service:
-            name: minio-service
-            namespace: minio-system
-            port:
-              number: 9000
-        path: /minio-api/(.*)
-        pathType: ImplementationSpecific
-      - backend:
-          service:
-            name: minio-service
-            namespace: minio-system
-            port:
-              number: 9001
-        path: /minio/(.*)
-        pathType: ImplementationSpecific
-```
