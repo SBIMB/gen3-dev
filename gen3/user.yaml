@@ -12,11 +12,15 @@ authz:
     policies:
     - services.sheepdog-admin
     - data_upload
+    - workspace
+    - open_data_reader
+    - all_programs_reader
     - ReganTestProject_submitter
     - gen3Project502_submitter
     users:
     - a0045661@wits.ac.za
     - regancannell@gmail.com
+    - gen3-user
 
   # can create/update/delete indexd records
   - name: indexd_admins
@@ -25,6 +29,7 @@ authz:
     users:
     - a0045661@wits.ac.za
     - regancannell@gmail.com
+    - gen3-user
 
   resources:
   - name: workspace
@@ -215,6 +220,23 @@ users:
       name: Regan Cannell
       email: a0045661@wits.ac.za
     policies:
+    - services.sheepdog-admin
+    - data_upload
+    - workspace
+    - open_data_reader
+    - all_programs_reader
+    - ReganTestProject_submitter
+    - gen3Project502_submitter
+  gen3-user:
+    tags:
+      name: Regan Cannell
+      email: a0045661@wits.ac.za
+    policies:
+    - services.sheepdog-admin
+    - data_upload
+    - workspace
+    - open_data_reader
+    - all_programs_reader
     - ReganTestProject_submitter
     - gen3Project502_submitter
   regancannell@gmail.com:
@@ -222,6 +244,11 @@ users:
       name: Regan Cannell
       email: regancannell@gmail.com
     policies:
+    - services.sheepdog-admin
+    - data_upload
+    - workspace
+    - open_data_reader
+    - all_programs_reader
     - ReganTestProject_submitter
     - gen3Project502_submitter
 

@@ -1,0 +1,11 @@
+{
+    "consent_codes": "ABCDEF", 
+    "primary_site": "Johannesburg", 
+    "*submitter_id": "pers_502", 
+    "*type": "case", 
+    "*experiments": {
+      "submitter_id": "pers_502"
+    }, 
+    "disease_type": "metabolic", 
+    "project_id": "P502"
+}

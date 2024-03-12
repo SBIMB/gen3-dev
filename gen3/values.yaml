@@ -53,6 +53,12 @@ aws-es-proxy:
     awsAccessKeyId: ""
     awsSecretAccessKey: ""
 
+etl:
+  enabled: true
+  image:
+    repository:
+    tag:
+
 fence:
   enabled: true
   image:
@@ -79,6 +85,11 @@ fence:
         cred: "gen3-user"
         endpoint_url: "s3.us-east-1.amazonaws.com"
         region: us-east-1
+      gen3-local-bucket:
+        cred: "minio-user"
+        endpoint_url: "http://cloud08.core.wits.ac.za:9001"
+        MINIO_ROOT_USER: "",
+        MINIO_ROOT_PASSWORD: ""
     # This is important for data upload.
     DATA_UPLOAD_BUCKET: "gen3-bucket"
   # -- (string) USER YAML. Passed in as a multiline string.

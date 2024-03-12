@@ -1,0 +1,20 @@
+{
+    "associated_experiment": null, 
+    "marker_panel_description": null, 
+    "number_experimental_group": null, 
+    "indels_identified": null, 
+    "data_description": "nominal data", 
+    "type_of_sample": null, 
+    "experimental_description": null, 
+    "*submitter_id": "pers_502", 
+    "number_samples_per_experimental_group": null, 
+    "type_of_specimen": null, 
+    "experimental_intent": null, 
+    "somatic_mutations_identified": null, 
+    "*type": "experiment", 
+    "type_of_data": null, 
+    "copy_numbers_identified": true, 
+    "*projects": {
+      "code": "P502"
+    }
+  }

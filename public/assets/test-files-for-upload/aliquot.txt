@@ -1,0 +1,15 @@
+{
+    "aliquot_volume": "5ml", 
+    "analyte_type_id": "12345", 
+    "concentration": null, 
+    "amount": 10, 
+    "*samples": {
+      "submitter_id": "pers_502"
+    }, 
+    "analyte_type": "aqueous", 
+    "*submitter_id": "pers_502", 
+    "aliquot_quantity": null, 
+    "*type": "aliquot", 
+    "project_id": "P502", 
+    "source_center": "lab"
+  }

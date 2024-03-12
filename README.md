@@ -478,6 +478,62 @@ The `gen3-client` SDK is used to upload files to a bucket, and `indexd` is used 
 
 ![Gen3-Client Upload Architecture](public/assets/images/gen3-client-upload-architecture.png "Gen3-Client Upload Architecture")    
 
+If an Amazon S3 bucket is used for uploading, then the required configuration values need to be provided to the `fence-deployment`. For instance, suppose there exists a bucket named `gen3-bucket` and an IAM user named `gen3-user`, then this user will need AWS credentials in order to access the bucket. These credentials need to be provided in the `values.yaml` file under the `fence` section. These values will then be populated inside the `fence-config` secret in the `default` namespace. An example of what the IAM policy for uploading to an S3 bucket is the following:
+```json
+{
+    "Version": "2012-10-17",
+    "Id": "Gen3BucketPolicy01",
+    "Statement": [
+        {
+            "Sid": "Gen3Upload",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::someId:user/gen3-user"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:GetBucketLocation",
+                "s3:ListBucket",
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::gen3-bucket/*",
+                "arn:aws:s3:::gen3-bucket"
+            ]
+        }
+    ]
+}
+```
+For all S3 actions to be allowed for a user, the following policy can be used:
+```json
+{
+    "Version": "2012-10-17",
+    "Id": "Gen3BucketPolicy01",
+    "Statement": [
+        {
+            "Sid": "Gen3Upload",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::938659344479:user/gen3-user"
+            },
+            "Action": "s3:*",
+            "Resource": [
+                "arn:aws:s3:::gen3-bucket/*",
+                "arn:aws:s3:::gen3-bucket"
+            ]
+        }
+    ]
+}
+```
+The command to list objects inside the bucket is the following:
+```bash
+aws s3 ls s3://gen3-bucket
+```
+If the `aws` CLI tool is installed and configured correctly, then a list of files/objects should appear in the terminal. To upload a single file from inside a folder to the `gen3-bucket`, the following command can be used:
+```bash
+aws s3 cp local-folder/folder-where-file-exists s3://gen3-bucket/ --recursive
+```
+
 If a **403 Unauthorized** error is returned when trying to upload a file, it is likely that the `usersync` job that ran during the Helm deployment did not update the `useryaml` config map to have the necessary permissions for uploading. This can be remedied manually by doing the following:   
 ```bash
 # delete the old job that ran during the Helm deployment
@@ -502,7 +558,7 @@ kubectl logs <arborist-pod-name>
 
 To authorise the `gen3-client` for uploading to the data commons, the following command needs to be run:
 ```bash
-gen3-client configure --profile=gen3-dev --cred=credentials.json --apiendpoint=https://cloud08.core.wits.ac.za/
+gen3-client configure --profile=gen3-user --cred=credentials.json --apiendpoint=https://cloud08.core.wits.ac.za/
 ```
 This command might fail due to certificate issues. It may complain that the self-signed certificate is not trusted. To trust the self-signed certificate, copy the contents of `cloud08.core.wits.ac.za.key` and `cloud08.core.wits.ac.za.crt` to `cloud08.core.wits.ac.za.pem`, and have this `.pem` file moved to the `/usr/local/share/certificates/` directory. Then when the following command is run
 ```bash
@@ -511,7 +567,10 @@ sudo update-ca-certificates
 then the self-signed certificate will be trusted.   
 
 ![gen3-client Authorised](public/assets/images/gen3-client-authorised.png "gen3-client Authorised") 
-
+To upload a file with the `gen3-client`, the following command can be used:
+```bash
+gen3-client upload --profile=gen3-user --upload-path=/path/to/file
+```
 If the `gen3-client` still does not work, then we can try other methods (use the API directly). The goal here is to obtain an access token. This access token will be used as a bearer token under the _Authorization_ header when making requests to the data commons. To get an access token, a POST request needs to be made to this endpoint:
 ```bash
 https://cloud08.core.wits.ac.za/user/credentials/cdis/access_token
@@ -568,6 +627,9 @@ https://cloud08.core.wits.ac.za/api/v0/submission/gen3Program502/P502
 the request is successful when the body is submitted as raw JSON. However, when using a JSON file, the parsing error persists.   
 
 ![Successful PUT Request with Raw JSON](public/assets/images/successful-put-request.png "Successful PUT Request with Raw JSON")    
+The `gen3-client` continues to fail to upload a file to the S3 bucket. The error message concerns some presigned url. More investigation and troubleshooting is required.   
+
+![Presigned URL Upload Error](public/assets/images/presigned-url-upload-error.png "Presigned URL Upload Error")    
 
 #### MinIO for Local Buckets
 Suppose we wish to upload to a bucket that is configured locally (on the node itself), and uses the Amazon S3 protocol. There exists several open-source options, but we'll describe the setup of [MinIO](https://min.io/docs/minio/kubernetes/upstream/index.html).   
@@ -593,18 +655,22 @@ kubectl get all -n minio-dev
 ```
 ![MinIO Workloads](public/assets/images/minio-workloads.png "MinIO Workloads") 
 
-However, we will go with a simpler setup. There are four new resources that we'll create, and we'll need to modify the ingress file, `revproxy-dev.yaml`, to add the `minio` paths. The four resources to be created are:
+However, we will go with a simpler setup. There are five new resources that we'll create. The five resources to be created are:
+- minio-system namespace  
 - [minio-pvc](minio/minio-pvc.yaml)
 - [minio-deployment](minio/minio-deployment.yaml)
 - [minio-service](minio/minio-service.yaml)   
+- [minio-ingress](minio/minio-ingress.yaml)   
+
 ```bash
 kubectl create namespace minio-system
 kubectl create -f minio/minio-pvc.yaml
 kubectl create -f minio/minio-deployment.yaml
 kubectl create -f minio/minio-service.yaml
 kubectl create -f minio/minio-pv.yaml
+kubectl create -f minio/minio-ingress.yaml
 ```
-After a few minutes, the pods inside the `minio-system` namespace should all be running and ready.    
+The `minio-ingress` references the secret `cloud08-tls-secret`, however, this secret exists in the `default` namespace. A replica of this secret should be created inside the `minio-system` namespace as well. After a few minutes, the pods inside the `minio-system` namespace should all be running and ready.    
 
 ![MinIO System Workloads](public/assets/images/minio-system-workloads.png "MinIO System Workloads")   
 

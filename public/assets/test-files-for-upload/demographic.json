@@ -1,0 +1,12 @@
+{
+    "ethnicity": "mixed", 
+    "year_of_birth": 1942, 
+    "*submitter_id": "pers_502", 
+    "*cases": {
+      "submitter_id": "pers_502"
+    }, 
+    "race": "mixed", 
+    "gender": "M", 
+    "year_of_death": 2023, 
+    "*type": "demographic"
+  }
