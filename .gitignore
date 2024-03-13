@@ -10,3 +10,5 @@ gen3/cloud08.core.wits.ac.za.csr
 gen3/cloud08.core.wits.ac.za.key
 gen3/cloud08.core.wits.ac.za.pem
 gen3/credentials.json
+minio/private.key
+minio/public.crt

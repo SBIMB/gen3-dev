@@ -10,7 +10,7 @@ unzip curl-8.4.0.zip
 A directory called `curl-8-4-0` will be created as a part of the unzipping process. Inside this directory, the installation process needs to take place:
 ```bash
 cd curl-8.4.0
-./configure --prefix=$HOME/curl --without-ssl
+./configure --prefix=$HOME/curl --with-ssl
 make
 make install
 ```
