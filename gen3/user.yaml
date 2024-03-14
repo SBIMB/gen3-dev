@@ -227,6 +227,30 @@ users:
     - all_programs_reader
     - ReganTestProject_submitter
     - gen3Project502_submitter
+  scott.hazelhurst@wits.ac.za:
+    tags:
+      name: Scott Hazelhurst
+      email: scott.hazelhurst@wits.ac.za
+    policies:
+    - services.sheepdog-admin
+    - data_upload
+    - workspace
+    - open_data_reader
+    - all_programs_reader
+    - ReganTestProject_submitter
+    - gen3Project502_submitter
+  shaun.aron@wits.ac.za:
+    tags:
+      name: Shaun Aron
+      email: shaun.aron@wits.ac.za
+    policies:
+    - services.sheepdog-admin
+    - data_upload
+    - workspace
+    - open_data_reader
+    - all_programs_reader
+    - ReganTestProject_submitter
+    - gen3Project502_submitter
   gen3-user:
     tags:
       name: Regan Cannell
