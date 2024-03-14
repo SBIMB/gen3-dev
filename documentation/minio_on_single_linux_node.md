@@ -1,31 +1,38 @@
 ## MinIO on Single Node (Linux)
 We'll be installing a single-node-single-drive (SNSD) instance of [Minio](https://min.io/docs/minio/linux/index.html) on a bare-metal Ubuntu machine (hostname `cloud05`). To install on an Ubuntu machine, run the following:
 ```bash
-wget https://dl.min.io/server/minio/release/linux-amd64/archive/minio_20240310025348.0.0_amd64.deb -O minio.deb
-sudo dpkg -i minio.deb
+wget https://dl.min.io/server/minio/release/linux-amd64/minio
 ```
-A minio directory should be created with the following commands:
+After the download is complete, we make the downloaded file executable with:
 ```bash
-mkdir ~/minio
-minio server ~/minio --console-address :9001
+sudo chmod +x ./minio
 ```
-The latter command might cause some warnings to be generated, such as changing the username and password of the admin user.
-![MinIO Default Credentials](public/assets/images/minio-default-credentials.png "MinIO Default Credentials") 
-
+Now we can move the executable file to the `/usr/local/bin` directory:
+```bash
+sudo mv ./minio /usr/local/bin
+``` 
 Instead of using `root` to work with MinIO, it is better to create a system group and user:
 ```bash
-sudo groupadd -r minio-user
-sudo useradd -M -r -g minio-user minio-user
+sudo useradd -r minio-user -s /sbin/nologin
+```
+We need to give this user permissions to the `minio` executable file:
+```bash
+sudo chown minio-user:minio-user /usr/local/bin/minio
 ```
 A data directory needs to be created for where all the objects will be stored:
 ```bash
-sudo mkdir /mnt/data
+sudo mkdir /usr/local/share/minio
 ```
 The ownership of this data directory needs to be given to the user and group:
 ```bash
-sudo chown minio-user:minio-user /mnt/data
+sudo chown minio-user:minio-user /usr/local/share/minio
 ```
-Environment variables need to be added for MinIO. Use `nano` or `vim` to open your preferred text editor and populate it with the following environment variables:
+Environment variables need to be added for MinIO. We'll create another directory for this:
+```bash
+sudo mkdir /etc/minio
+sudo chown minio-user:minio-user /etc/minio
+```
+Use `nano` or `vim` to open your preferred text editor and populate it with the following environment variables:
 ```bash
 sudo vim /etc/default/minio
 ```
@@ -37,11 +44,25 @@ MINIO_OPTS="--certs-dir /home/regan/.minio/certs --console-address :9001"
 MINIO_ROOT_USER=minioadmin
 
 MINIO_ROOT_PASSWORD=minioadmin
+
+MINIO_ACCESS_KEY="some_access_key"
+MINIO_SECRET_KEY="some_secret_key"
+
+MINIO_VOLUMES="/usr/local/share/minio/"
+MINIO_OPTS="-C /etc/minio --address 146.141.240.75:9000 --console-address 146.141.240.75:9001"
 ```
 We need to ensure that the firewall allows for ports 9000 and 9001 to be open. Since we are using `iptables`, we use:
 ```bash
 sudo iptables -I INPUT -p tcp -s 0.0.0.0/0 --dport 9000 -j ACCEPT
 sudo iptables -I INPUT -p tcp -s 0.0.0.0/0 --dport 9001 -j ACCEPT
+```
+For MinIO to be started whenever the system boots up, we need to install the following script:
+```bash
+curl -O https://raw.githubusercontent.com/minio/minio-service/master/linux-systemd/minio.service
+```
+This downloaded script needs to be moved to the `systemd` directory:
+```bash
+sudo mv minio.service /etc/systemd/system
 ```
 Now we need to create a self-signed certificate for our MinIO server. First, we download the binary file from `certgen`:
 ```bash
@@ -57,17 +78,21 @@ To generate a certificate for the host machine, run:
 ```bash
 sudo certgen -host cloud05.core.wits.ac.za, 146.141.240.75	
 ```
-A new certificate, `public.crt` and `private.key`, should have been created. These files need to be moved to the `/home/regan/.minio/certs` directory:
+A new certificate, `public.crt` and `private.key`, should have been created. These files need to be moved to the `/etc/minio/` directory:
 ```bash
-sudo mkdir -p /home/regan/.minio/certs
-sudo mv private.key public.crt /home/regan/.minio/certs
+sudo mv private.key public.crt /etc/minio/
 ```
 Ownership of both files need to be given to the MinIO user and group:
 ```bash
-sudo chown minio-user:minio-user /home/regan/.minio/certs/private.key
-sudo chown minio-user:minio-user /home/regan/.minio/certs/public.crt
+sudo chown minio-user:minio-user /etc/minio/private.key
+sudo chown minio-user:minio-user /etc/minio/public.crt
 ```
-We can start the MinIO server using `systemd` with the following command:
+To apply the changes, we need to reload the `systemd` service files:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable minio
+```
+We can now start MinIO with:
 ```bash
 sudo systemctl start minio
 ```
@@ -75,8 +100,13 @@ We can check the status with:
 ```bash
 sudo systemctl status minio
 ```
-![MinIO Start Up Status](public/assets/images/minio-start-up-status.png "MinIO Start Up Status") 
+![MinIO Status](public/assets/images/minio-status.png "MinIO Status") 
 
-As can be seen in the screenshot above, the MinIO urls are using HTTP instead of HTTPS. This means that something has gone wrong with the certification creation process. We will need to investigate why this is the case. At least the MinIO UI appears and we can login:   
+We should also see that MinIO can be accessed on HTTPS. This is good news, since it means that the generation of SSL certificates was a success.   
 
-![MinIO Login Page](public/assets/images/minio-login-page.png "MinIO Login Page") 
+![MinIO HTTPS Login](public/assets/images/minio-https-login.png "MinIO HTTPS Login") 
+
+Once logged in, we can create a bucket called `gen3-minio-bucket` that will be used for all the Gen3 file uploads.   
+
+![Gen3 MinIO Bucket](public/assets/images/gen3-minio-bucket.png "Gen3 MinIO Bucket") 
+

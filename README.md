@@ -737,4 +737,7 @@ data:
     }
 ```
 Now whenever a file is uploaded to the `gen3-bucket`, a message will be sent to the SNS and SQS services that will then trigger the creation of a job which will then update the `metadata` database with the relevant metadata.   
+
 ![Uploaded File in READY State](public/assets/images/uploaded-file-in-ready-state.png "Uploaded File in READY State")   
+
+The above upload process works with an Amazon S3 bucket. We'd like to use a local bucket (with MinIO). To see how to setup a MinIO server on an Ubuntu machine, please refer to [this document](documentation/minio_on_single_linux_node.md).
