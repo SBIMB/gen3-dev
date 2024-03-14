@@ -20,7 +20,7 @@ If the Helm installation is a success, the workloads in the `minio-dev` namespac
 ```bash
 kubectl get all -n minio-dev
 ```
-![MinIO Workloads](public/assets/images/minio-workloads.png "MinIO Workloads") 
+![MinIO Workloads](../public/assets/images/minio-workloads.png "MinIO Workloads") 
 
 However, we will go with a simpler setup. There are five new resources that we'll create. The five resources to be created are:
 - minio-system namespace  
@@ -39,20 +39,20 @@ kubectl create -f minio/minio-ingress.yaml
 ```
 The `minio-ingress` references the secret `cloud08-tls-secret`, however, this secret exists in the `default` namespace. A replica of this secret should be created inside the `minio-system` namespace as well. After a few minutes, the pods inside the `minio-system` namespace should all be running and ready.    
 
-![MinIO System Workloads](public/assets/images/minio-system-workloads.png "MinIO System Workloads")   
+![MinIO System Workloads](../public/assets/images/minio-system-workloads.png "MinIO System Workloads")   
 
 The `minio-service` should be accessible on the following url: `http://<ip-address>:<nodePort>/minio`.    
 
-![MinIO Login Page](public/assets/images/minio-login.png "MinIO Login")   
+![MinIO Login Page](../public/assets/images/minio-login.png "MinIO Login")   
 
 Once logged in, a bucket, `gen3-local-bucket`, can be created using the UI.   
 
-![MinIO Gen3 Local Bucket](public/assets/images/minio-gen3-local-bucket.png "MinIO Gen3 Local Bucket")   
+![MinIO Gen3 Local Bucket](../public/assets/images/minio-gen3-local-bucket.png "MinIO Gen3 Local Bucket")   
 
 We can use the console (or UI) to upload test files to the `gen3-local-bucket`. These files should then be stored inside the `/data/gen3-local-bucket/` directory of the `minio` pod. To get inside the pod's container, run:
 ```bash
 kubectl exec --stdin --tty minio-676bd87f88-8wxdx -n minio-system -- bash
 ```   
 
-![Uploaded files in /data/ directory](public/assets/images/uploaded-files-in-data-directory.png "Uploaded files in /data/ directory")   
+![Uploaded files in /data/ directory](../public/assets/images/uploaded-files-in-data-directory.png "Uploaded files in /data/ directory")   
 The files will be stored in the directory `/var/lib/rancher/k3s/storage`.  

@@ -13,11 +13,11 @@ To get all information about the Grafana deplyment, run:
 ```bash
 kubectl get all --namespace=gen3-grafana
 ```
-![Grafana k8s Objects](/public/assets/images/grafana-k8s-objects.png "Grafana k8s Objects")  
+![Grafana k8s Objects](../public/assets/images/grafana-k8s-objects.png "Grafana k8s Objects")  
 
 The `grafana` service should have an **EXTERNAL-IP**. This IP can be used to access the Grafana sign-in page in the browser. If there is no **EXTERNAL_IP**, then port-forwarding can be performed like this:
 ```bash
 kubectl port-forward service/grafana 3000:3000 --namespace=gen3-grafana
 ```
 Then the Grafana sign-in page can be accessed on `http://<ip-address>:3000`. Use `admin` for both the username and the password.   
-![Grafana Login Page](/public/assets/images/grafana-login-page.png "Grafana Login Page")  
+![Grafana Login Page](../public/assets/images/grafana-login-page.png "Grafana Login Page")  

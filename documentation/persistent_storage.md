@@ -76,7 +76,7 @@ The MinIO dashboard can be accessed as follows (or it can be opened up in the br
 ```bash
 curl http://146.141.240.78:9001/minio
 ```
-![HTML of MinIO Console](/public/assets/images/minio-console-in-terminal.png "HTML of MinIO Console")   
+![HTML of MinIO Console](../public/assets/images/minio-console-in-terminal.png "HTML of MinIO Console")   
 
 If using an EC2 instance or some other vm, a simple way to access the MinIO console is by port-forwarding the service, e.g.,
 ```bash
@@ -84,7 +84,7 @@ kubectl port-forward --address 0.0.0.0 svc/minio-service 8088:9090
 ```
 This will allow for the browser to access the `minio-service` on port `<ip-address-of-node>:8088`:   
 
-![MinIO in the Browser](/public/assets/images/minio-console-in-browser.png "MinIO in the Browser")  
+![MinIO in the Browser](../public/assets/images/minio-console-in-browser.png "MinIO in the Browser")  
 
 Default login credentials are `minioadmin` and `minioadmin`.   
 

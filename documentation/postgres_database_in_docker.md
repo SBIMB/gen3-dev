@@ -11,5 +11,5 @@ echo "Create gen3_schema Schema"
 docker exec -it gen3-dev-db bash -c 'PGPASSWORD=gen3-password psql -U postgres -d gen3_db -c "create schema gen3_schema"'
 ```
 If the script runs successfully, the output should look like:
-![Gen3 PostgreSQL Database](/public/assets/images/gen3-db.png "Gen3 PostgreSQL Database")   
+![Gen3 PostgreSQL Database](../public/assets/images/gen3-db.png "Gen3 PostgreSQL Database")   
 By default, the hostname of the database is the container id.   

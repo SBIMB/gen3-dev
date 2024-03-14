@@ -100,13 +100,13 @@ We can check the status with:
 ```bash
 sudo systemctl status minio
 ```
-![MinIO Status](public/assets/images/minio-status.png "MinIO Status") 
+![MinIO Status](../public/assets/images/minio-status.png "MinIO Status")    
 
 We should also see that MinIO can be accessed on HTTPS. This is good news, since it means that the generation of SSL certificates was a success.   
 
-![MinIO HTTPS Login](public/assets/images/minio-https-login.png "MinIO HTTPS Login") 
+![MinIO HTTPS Login](../public/assets/images/minio-https-login.png "MinIO HTTPS Login") 
 
 Once logged in, we can create a bucket called `gen3-minio-bucket` that will be used for all the Gen3 file uploads.   
 
-![Gen3 MinIO Bucket](public/assets/images/gen3-minio-bucket.png "Gen3 MinIO Bucket") 
+![Gen3 MinIO Bucket](../public/assets/images/gen3-minio-bucket.png "Gen3 MinIO Bucket") 
 
