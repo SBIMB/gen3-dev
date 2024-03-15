@@ -37,14 +37,6 @@ Use `nano` or `vim` to open your preferred text editor and populate it with the 
 sudo vim /etc/default/minio
 ```
 ```txt
-MINIO_VOLUMES="/mnt/data"
-
-MINIO_OPTS="--certs-dir /home/regan/.minio/certs --console-address :9001"
-
-MINIO_ROOT_USER=minioadmin
-
-MINIO_ROOT_PASSWORD=minioadmin
-
 MINIO_ACCESS_KEY="some_access_key"
 MINIO_SECRET_KEY="some_secret_key"
 
@@ -110,3 +102,29 @@ Once logged in, we can create a bucket called `gen3-minio-bucket` that will be u
 
 ![Gen3 MinIO Bucket](../public/assets/images/gen3-minio-bucket.png "Gen3 MinIO Bucket") 
 
+### Installing the MinIO Client
+To download and install the MinIO client, run the following:
+```bash
+curl https://dl.min.io/client/mc/release/linux-amd64/mc \
+  --create-dirs \
+  -o $HOME/minio-binaries/mc
+
+chmod +x $HOME/minio-binaries/mc
+export PATH=$PATH:$HOME/minio-binaries/
+
+mc --help
+```
+Then set an alias, provide the hostname, and give both the access keys and secret keys, respectively:
+```bash
+bash +o history
+mc alias set ALIAS HOSTNAME ACCESS_KEY SECRET_KEY
+bash -o history
+```
+The following is an example:
+```bash
+mc alias set minio-user https://146.141.240.75:9001 my_access_key my_secret_key
+```
+The connection to the MinIO server can be tested with:
+```bash
+mc admin info minio-user
+```
