@@ -1,5 +1,6 @@
 .DS_Store
 strict-local.sh
+strict-local.cloud05.sh
 hosts.txt
 resolv.conf
 gen3/values.dev.yaml

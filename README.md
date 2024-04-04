@@ -38,7 +38,15 @@ kubectl get all -n kube-system
 ```
 ![Resources in kube-system Namespace](/public/assets/images/kube-system-resources.png "Resources in kube-system Namespace")   
 
-It's very important to configure the `coredns` pods after a new installation of a K3s cluster. The cluster needs to resolve the DNS in the same way as the host node. To do this, we need to update the `/etc/rancher/k3s/config.yaml` file by appending the kubelet arg, i.e. 
+It's very important to configure the `coredns` pods after a new installation of a K3s cluster. The cluster needs to resolve the DNS in the same way as the host node. To do this, a custom `resolv.conf` file named `/etc/k3s-resolv.conf` needs to be created that will contain the upstream DNS server for any external domains. The contents of this file should be identical to that of the host's `/etc/resolv.conf` file, with the addition of the router's IP address, which is usually `192.168.1.1`. So in our case, it would look like this:
+```bash
+nameserver 192.168.1.1
+nameserver 146.141.8.16
+nameserver 146.141.15.210
+nameserver 8.8.8.8
+search core.wits.ac.za
+```
+We need to update the `/etc/rancher/k3s/config.yaml` file by appending the kubelet arg, i.e. 
 ```bash
 echo 'kubelet-arg:' | sudo tee -a /etc/rancher/k3s/config.yaml
 echo '- "resolv-conf=/etc/k3s-resolv.conf"' | sudo tee -a /etc/rancher/k3s/config.yaml
@@ -58,7 +66,7 @@ If something is not quite right and there is a desire to re-install K3s with som
 ```
 In such a case, remember to delete the `.kube` directory so that there aren't any certificate issues with a fresh re-install.   
 
-The above process installs and configures a single-node cluster. This single node acts as both a master and a worker node. To add additional worker nodes, please read [this document](documentation/adding_a_worker_node.md) for more details.   
+The above process installs and configures a single-node cluster. This single node acts as both a master and a worker node. To add additional worker nodes, please read [this document](documentation/adding_and_removing_a_worker_node.md) for more details.   
 
 ### Helm
 [Helm](https://helm.sh/) is a package manager for Kubernetes that allows for the installation or deployment of applications onto a Kubernetes cluster. We can install it as follows:
