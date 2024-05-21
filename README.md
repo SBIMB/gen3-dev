@@ -102,7 +102,7 @@ apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
   name: k3s-cloud08-pool
-  namespace: metallb
+  namespace: metallb-system
 spec:
   addresses:
   - 146.141.240.78/32
@@ -113,7 +113,7 @@ apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
   name: k3s-cloud08-l2advertisment
-  namespace: metallb
+  namespace: metallb-system
 spec:
   ipAddressPools:
   - k3s-cloud08-pool
@@ -151,49 +151,13 @@ After a short while, we can run the following command to see if the pods are up 
 ```bash
 kubectl get pods --namespace=ingress-nginx
 ```
-For a simple test, let us create a sample deployment and a service to expose the deployment:
-```bash
-kubectl create deployment my-deployment --image=nginx --port=80
-kubectl expose deployment my-deployment
-```
-An ingress resource can also be created as follows:
-```bash
-kubectl create ingress my-deployment-ingress --class=nginx --rule="my-deployment.localdev.me/*=my-deployment:80"
-```
+The service, `ingress-nginx-controller`, should be edited to be of type `LoadBalancer` instead of `NodePort`. This will result in an external IP being exposed for the service.   
+
 A local port can be forwarded to the ingress controller:
 ```bash
 kubectl port-forward --namespace=ingress-nginx service/ingress-nginx-controller 8080:80
 ```
-An NGINX welcome page should be seen if visiting the url http://my-deployment.localdev.me:8080/ (for local development), or using
-```bash
-curl http://my-deployment.localdev.me:8080/
-```
-which yields
-```html
-<!DOCTYPE html>
-<html>
-<head>
-<title>Welcome to nginx!</title>
-<style>
-html { color-scheme: light dark; }
-body { width: 35em; margin: 0 auto;
-font-family: Tahoma, Verdana, Arial, sans-serif; }
-</style>
-</head>
-<body>
-<h1>Welcome to nginx!</h1>
-<p>If you see this page, the nginx web server is successfully installed and
-working. Further configuration is required.</p>
 
-<p>For online documentation and support please refer to
-<a href="http://nginx.org/">nginx.org</a>.<br/>
-Commercial support is available at
-<a href="http://nginx.com/">nginx.com</a>.</p>
-
-<p><em>Thank you for using nginx.</em></p>
-</body>
-</html>
-```
 Here is an example Ingress that makes use of the controller: 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -568,11 +532,11 @@ To authorise the `gen3-client` for uploading to the data commons, the following 
 ```bash
 gen3-client configure --profile=gen3-user --cred=credentials.json --apiendpoint=https://cloud08.core.wits.ac.za/
 ```
-This command might fail due to certificate issues. It may complain that the self-signed certificate is not trusted. To trust the self-signed certificate, copy the contents of `cloud08.core.wits.ac.za.key` and `cloud08.core.wits.ac.za.crt` to `cloud08.core.wits.ac.za.pem`, and have this `.pem` file moved to the `/usr/local/share/certificates/` directory. Then when the following command is run
+This command might fail due to certificate issues. It may complain that the self-signed certificate is not trusted. To trust the self-signed certificate, copy the contents of `cloud08.core.wits.ac.za.key` and `cloud08.core.wits.ac.za.crt` to `cloud08.core.wits.ac.za.pem`, and have this `.pem` file moved to the `/usr/local/share/certificates/` (or `/usr/local/share/certificates/`) directory. Then when the following command is run
 ```bash
 sudo update-ca-certificates
 ```
-then the self-signed certificate will be trusted.   
+the self-signed certificate will be trusted.   
 
 ![gen3-client Authorised](public/assets/images/gen3-client-authorised.png "gen3-client Authorised") 
 To upload a file with the `gen3-client`, the following command can be used:

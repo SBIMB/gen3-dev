@@ -53,8 +53,8 @@ kubectl create secret tls cloud08-tls-secret --key cloud08_certs/cloud08.key --c
 ```
 To create a self-signed certificate with SubjectAltName (SAN), we can do the following:
 ```bash
-openssl genrsa -out cloud05.core.wits.ac.za.key 2048
-openssl req -new -key cloud05.core.wits.ac.za.key -out cloud05.core.wits.ac.za.csr
+openssl genrsa -out cloud08.core.wits.ac.za.key 2048
+openssl req -new -key cloud08.core.wits.ac.za.key -out cloud08.core.wits.ac.za.csr
 ```
 There will be some prompts. They should be filled in accordingly. Then the following file should be created with
 ```bash
@@ -66,12 +66,12 @@ subjectKeyIdentifier   = hash
 authorityKeyIdentifier = keyid:always,issuer:always
 basicConstraints       = CA:FALSE
 keyUsage               = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, keyAgreement, keyCertSign
-subjectAltName         = DNS:cloud05.core.wits.ac.za, DNS:*.cloud05.core.wits.ac.za
+subjectAltName         = DNS:cloud08.core.wits.ac.za, DNS:*.cloud08.core.wits.ac.za
 issuerAltName          = issuer:copy
 ```
 The self-signed certificate can then be generated with the following command:
 ```bash
-openssl x509 -req -in cloud05.core.wits.ac.za.csr -signkey cloud05.core.wits.ac.za.key -out cloud05.core.wits.ac.za.crt -days 3650 -sha256 -extfile v3.ext
+openssl x509 -req -in cloud08.core.wits.ac.za.csr -signkey cloud08.core.wits.ac.za.key -out cloud08.core.wits.ac.za.crt -days 3650 -sha256 -extfile v3.ext
 ```
 If successful, something similar to the following should be the output:
 ```bash

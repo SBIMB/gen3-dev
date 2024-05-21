@@ -122,7 +122,7 @@ bash -o history
 ```
 The following is an example:
 ```bash
-mc alias set minio-user https://146.141.240.75:9001 my_access_key my_secret_key
+mc alias set minio-user https://cloud05.core.wits.ac.za my_access_key my_secret_key
 ```
 The connection to the MinIO server can be tested with:
 ```bash
