@@ -391,6 +391,7 @@ helm get values <name-of-release>
 In our case, the name of the release is `gen3-dev`. The output will be a reproduction of the `values.yaml` file with the first line being **USER-SUPPLIED VALUES:**. There may exist the requirement to edit values in the `values.yaml` _without_ upgrading the version of the release. In that case, the following commands could be used if the values from the previous release need to be used again (this is because, by default, the `helm upgrade` command resets the values to those baked into the chart):
 ```bash
 helm upgrade --reuse-values -f gen3/updated-values.yaml gen3-dev gen3/gen3
+helm upgrade --reuse-values -f values.yaml gen3-dev gen3/gen3
 ```
 or 
 ```bash
@@ -696,6 +697,40 @@ Create a file called `credentials.json` with the following content:
     ]
 }
 ```
+This `credentials.json` file needs to be added as a key in the secret `ssjdispatcher-creds`. This can be done as follows:
+```bash
+kubectl delete secret ssjdispatcher-creds
+kubectl create secret generic ssjdispatcher-creds --from-file=credentials.json
+```
+After doing this, we also need to create a few resources for the `ssjdispatcher`. Create a file called `ssjdispatcher-rolebinding.yaml` and fill it with the following:
+```yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ssjdispatcher-job-sa
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ssjdispatcher-binding
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+- kind: ServiceAccount
+  name: ssjdispatcher-service-account`
+```
+To create these resources, apply the manifest with
+```bash
+kubectl apply -f ssjdispatcher-rolebinding.yaml
+```
+We also need to create a service account called `ssjdispatcher-job-sa` with 
+```bash
+kubectl create sa ssjdispatcher-job-sa
+```
 The last thing to be done is to manually update the image referenced inside the `manifest-ssjdispatcher` config map:
 ```bash 
 kubectl edit cm manifest-ssjdispatcher
@@ -707,6 +742,10 @@ data:
     {
       "indexing": "quay.io/cdis/indexs3client:2022.08"
     }
+```
+It would probably be a good idea to restart the `ssjdispatcher` deployment with
+```bash
+kubectl rollout restart deployment ssjdispatcher
 ```
 Now whenever a file is uploaded to the `gen3-bucket`, a message will be sent to the SNS and SQS services that will then trigger the creation of a job which will then update the `metadata` database with the relevant metadata.   
 
