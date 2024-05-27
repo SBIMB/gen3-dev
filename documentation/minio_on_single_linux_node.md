@@ -68,7 +68,7 @@ If the installation has been successful, then running `certgen -h` will output a
 
 To generate a certificate for the host machine, run:
 ```bash
-sudo certgen -host cloud05.core.wits.ac.za, 146.141.240.75	
+sudo certgen -host "146.141.240.75,cloud05.core.wits.ac.za"
 ```
 A new certificate, `public.crt` and `private.key`, should have been created. These files need to be moved to the `/etc/minio/` directory:
 ```bash
@@ -122,9 +122,42 @@ bash -o history
 ```
 The following is an example:
 ```bash
-mc alias set minio-user https://cloud05.core.wits.ac.za my_access_key my_secret_key
+mc alias set minio-user https://cloud05.core.wits.ac.za:9000 my_access_key my_secret_key
 ```
 The connection to the MinIO server can be tested with:
 ```bash
 mc admin info minio-user
 ```
+
+### Installing the AWS CLI
+The AWS CLI can be quickly downloaded and installed with
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+```
+Once installed, credentials need to be configure with:
+```bash
+aws configure
+```
+We can list the MinIO buckets (which are S3 buckets) with the following command:
+```bash
+aws --endpoint-url https://ip-address:9000 s3 ls --no-verify-ssl
+```
+To see contents within a specific bucket, we run
+```bash
+aws --endpoint-url https://ip-address:9000 s3 ls s3://my-minio-bucket --no-verify-ssl
+```
+To add an **S3** alias for MinIO, we need to run
+```bash
+mc alias set s3 https://s3.region.amazonaws.com MINIO_ACCESS_KEY MINIO_SECRET_KEY
+```
+Now third party applications should be able to interact with the MinIO buckets as if it's an AWS S3 bucket.   
+
+### Publishing Upload Events to RabbitMQ
+Update the environment variables by opening `/etc/default/minio` and adding the following:
+```txt
+MINIO_NOTIFY_AMQP_ENABLE="on"
+MINIO_NOTIFY_AMQP_URL="amqp://<username>:<password>@<ip-address>:<port>/<vhost>"
+```
+The `AMQP` url comes from the RabbitMQ instance that needs to be setup.  The details for setting up RabbitMQ can be found over [here](./setting_up_rabbitmq.md).
