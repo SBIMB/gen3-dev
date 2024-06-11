@@ -100,7 +100,13 @@ We should also see that MinIO can be accessed on HTTPS. This is good news, since
 
 Once logged in, we can create a bucket called `gen3-minio-bucket` that will be used for all the Gen3 file uploads.   
 
-![Gen3 MinIO Bucket](../public/assets/images/gen3-minio-bucket.png "Gen3 MinIO Bucket") 
+![Gen3 MinIO Bucket](../public/assets/images/gen3-minio-bucket.png "Gen3 MinIO Bucket")    
+
+We can also check the health status of the MinIO API with 
+```bash
+curl -I https://cloud05.core.wits.ac.za/minio/health/live -k
+```
+If the response has status code _200_, then all is well.
 
 ### Installing the MinIO Client
 To download and install the MinIO client, run the following:

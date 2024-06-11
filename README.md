@@ -533,7 +533,7 @@ To authorise the `gen3-client` for uploading to the data commons, the following 
 ```bash
 gen3-client configure --profile=gen3-user --cred=credentials.json --apiendpoint=https://cloud08.core.wits.ac.za/
 ```
-This command might fail due to certificate issues. It may complain that the self-signed certificate is not trusted. To trust the self-signed certificate, copy the contents of `cloud08.core.wits.ac.za.key` and `cloud08.core.wits.ac.za.crt` to `cloud08.core.wits.ac.za.pem`, and have this `.pem` file moved to the `/usr/local/share/certificates/` (or `/usr/local/share/certificates/`) directory. Then when the following command is run
+This command might fail due to certificate issues. It may complain that the self-signed certificate is not trusted. To trust the self-signed certificate, copy the contents of `cloud08.core.wits.ac.za.key` and `cloud08.core.wits.ac.za.crt` to `cloud08.core.wits.ac.za.pem`, and have this `.pem` file moved to the `/usr/local/share/certificates/` (or `/usr/local/share/ca-certificates/`) directory. Then when the following command is run
 ```bash
 sudo update-ca-certificates
 ```
