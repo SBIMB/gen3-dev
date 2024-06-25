@@ -45,6 +45,7 @@ authz:
     - name: 'indexd'
       subresources:
       - name: 'admin'
+      - name: 'bundles'
     - name: audit
       subresources:
       - name: presigned_url
@@ -89,6 +90,7 @@ authz:
     - indexd_admin
     resource_paths:
     - /programs
+    - /services/indexd/admin
   - id: open_data_reader
     description: data open to all users
     role_ids:
