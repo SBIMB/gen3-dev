@@ -56,7 +56,7 @@ We then create an `index.html` file and use our text editor to populate it with 
     <div class="title-page-header">
         <header class="header-text">
             <h1><b>Welcome to Cloud05!</b></h1>
-            <h4>IP Address is 146.141.240.75</h4>
+            <h4>IP Address is xxx.xxx.xxx.xx</h4>
         </header>
     </div>
 </body>
@@ -179,4 +179,26 @@ server {
       proxy_pass https://minio_console; # This uses the upstream directive definition to load balance
    }
 }
+```
+
+### Uninstalling NGINX   
+To uninstall NGINX, it is a good idea to stop the service from running with
+```bash
+sudo systemctl stop nginx
+```
+Then we can use the `apt` package manager to purge the server of NGINX:
+```bash
+sudo apt-get purge nginx
+```
+We can also remove additional dependencies that were added with the installation of NGINX:
+```bash
+sudo apt-get autoremove
+```
+Optionally, config files can also be deleted with:
+```bash
+sudo rm -rf /etc/nginx /var/log/nginx
+```
+To ensure that the NGINX webserver has been successfully removed, we can check the status with:
+```bash
+sudo systemctl status nginx
 ```
