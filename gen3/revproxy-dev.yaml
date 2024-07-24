@@ -1,14 +1,6 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  annotations:
-    meta.helm.sh/release-name: gen3-dev
-    meta.helm.sh/release-namespace: default
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    kubernetes.io/tls-acme: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /
-  labels:
-    app.kubernetes.io/managed-by: Helm
   name: revproxy-dev
   namespace: default
 spec:
@@ -24,19 +16,33 @@ spec:
               number: 80
         path: /
         pathType: Prefix
+  - host: www.gen3-sbimb.com
+    http:
+      paths:
       - backend:
           service:
-            name: minio-service
+            name: revproxy-service
             port:
-              number: 9000
-        path: /minio-api/(.*)
-        pathType: ImplementationSpecific
+              number: 80
+        path: /
+        pathType: Prefix
+  - host: gen3-sbimb.com
+    http:
+      paths:
       - backend:
           service:
-            name: minio-service
+            name: revproxy-service
             port:
-              number: 9001
-        path: /minio/(.*)
-        pathType: ImplementationSpecific
+              number: 80
+        path: /
+        pathType: Prefix
   tls:
-  - secretName: cloud08-tls-secret
+  - hosts:
+    - cloud08.core.wits.ac.za
+    secretName: cloud08-tls-secret
+  - hosts:
+    - gen3-sbimb.com
+    secretName: gen3-sbimb-secret
+  - hosts:
+    - www.gen3-sbimb.com
+    secretName: gen3-sbimb-secret
