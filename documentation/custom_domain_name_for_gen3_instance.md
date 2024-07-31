@@ -9,6 +9,7 @@ The certificates can be downloaded as a `.zip` file. After extraction, there'll 
 On the Ubuntu machine where the Kubernetes cluster is running, these certificates should be copied to the appropriate directories, respectively.   
 ```bash
 sudo cp certificate.crt /etc/ssl/
+sudo cp certificate.crt /etc/ssl/certs/
 sudo cp ca_bundle.crt /etc/ssl/
 sudo cp private.key /etc/ssl/private
 ```

@@ -14,3 +14,5 @@ gen3/cloud05.core.wits.ac.za.pem
 gen3/credentials.json
 minio/private.key
 minio/public.crt
+gen3-sbimb.com.zip
+gen3-sbimb.com/
