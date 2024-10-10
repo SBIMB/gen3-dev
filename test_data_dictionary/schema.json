@@ -382,66 +382,6 @@
             }
         }
     },
-    "ethnicity.yaml": {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "id": "ethnicity",
-        "title": "Ethnicities",
-        "type": "object",
-        "namespace": "https://gen3-dev.core.wits.ac.za",
-        "category": "administrative",
-        "program": "*",
-        "project": "*",
-        "description": "Ethnicity of individual or patient.",
-        "additionalProperties": false,
-        "submittable": true,
-        "validators": null,
-        "systemProperties": [
-            "id",
-            "project_id",
-            "state",
-            "created_datetime",
-            "updated_datetime"
-        ],
-        "links": [
-            {
-                "name": "projects",
-                "backref": "ethnicities",
-                "label": "contribute_to",
-                "target_type": "project",
-                "multiplicity": "many_to_many",
-                "required": true
-            }
-        ],
-        "required": [
-            "code",
-            "submitter_id",
-            "type",
-            "projects"
-        ],
-        "uniqueKeys": [
-            [
-                "code"
-            ],
-            [
-                "project_id",
-                "submitter_id"
-            ]
-        ],
-        "properties": {
-            "code": {
-                "type": "integer"
-            },
-            "description": {
-                "type": "string"
-            },
-            "ethnicity_name": {
-                "type": "string"
-            },
-            "nairobi_code": {
-                "type": "integer"
-            }
-        }
-    },
     "study.yaml": {
         "$schema": "http://json-schema.org/draft-04/schema#",
         "id": "study",
@@ -496,6 +436,168 @@
             },
             "description": {
                 "type": "string"
+            }
+        }
+    },
+    "hhMemberships.yaml": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "hhmemberships",
+        "title": "HHMemberships",
+        "namespace": "https://gen3-dev.core.wits.ac.za",
+        "category": "administrative",
+        "program": "*",
+        "project": "*",
+        "description": "Household memberships of individuals partaking in the study.",
+        "additionalProperties": false,
+        "submittable": true,
+        "validators": null,
+        "systemProperties": [
+            "membership_id",
+            "project_id",
+            "state",
+            "created_datetime",
+            "updated_datetime"
+        ],
+        "links": [
+            {
+                "name": "projects",
+                "backref": "sites",
+                "label": "contribute_to",
+                "target_type": "project",
+                "multiplicity": "many_to_many",
+                "required": true
+            }
+        ],
+        "required": [
+            "location_id",
+            "submitter_id",
+            "type",
+            "projects"
+        ],
+        "uniqueKeys": [
+            [
+                "membership_id",
+                "hh_id",
+                "hhhead_id"
+            ],
+            [
+                "project_id",
+                "submitter_id"
+            ]
+        ],
+        "properties": {
+            "membership_id": {
+                "type": "string",
+                "description": "This is the nth-time a member joined this specific household."
+            },
+            "hdss_name": {
+                "type": "string"
+            },
+            "individual_id": {
+                "type": "string",
+                "description": "A number uniquely identifying all the records belonging to a specific individual in the data file."
+            },
+            "hh_id": {
+                "type": "string",
+                "description": "A number uniquely identifying all the records belonging to a specific household in the data file."
+            },
+            "start_date": {
+                "type": "string",
+                "description": "When a member joined a household."
+            },
+            "end_date": {
+                "type": "string",
+                "description": "When a member ceased being a household member."
+            },
+            "hhhead_id": {
+                "type": "string",
+                "description": "IndividualId of the householdhead (HHH)."
+            },
+            "hh_relation": {
+                "type": "string",
+                "description": "Relationship of this member to the household head."
+            }
+        }
+    },
+    "individualSESIndicators.yaml": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "individualSESIndicators",
+        "title": "IndividualSESIndicators",
+        "namespace": "https://gen3-dev.core.wits.ac.za",
+        "category": "administrative",
+        "program": "*",
+        "project": "*",
+        "description": "SES indicators for individuals in the study.",
+        "additionalProperties": false,
+        "submittable": true,
+        "validators": null,
+        "systemProperties": [
+            "membership_id",
+            "project_id",
+            "state",
+            "created_datetime",
+            "updated_datetime"
+        ],
+        "links": [
+            {
+                "name": "projects",
+                "backref": "sites",
+                "label": "contribute_to",
+                "target_type": "project",
+                "multiplicity": "many_to_many",
+                "required": true
+            }
+        ],
+        "required": [
+            "record_id",
+            "submitter_id",
+            "type",
+            "projects"
+        ],
+        "uniqueKeys": [
+            [
+                "record_id",
+                "individual_id"
+            ],
+            [
+                "project_id",
+                "submitter_id"
+            ]
+        ],
+        "properties": {
+            "record_id": {
+                "type": "string",
+                "description": "Primary key"
+            },
+            "hdss_name": {
+                "type": "string"
+            },
+            "individual_id": {
+                "type": "string",
+                "description": "A number uniquely identifying all the records belonging to a specific individual in the data file."
+            },
+            "source": {
+                "type": "string"
+            },
+            "obs_date": {
+                "type": "string",
+                "description": "Observation date"
+            },
+            "currently_working": {
+                "type": "boolean",
+                "description": "Individual in household currently employed"
+            },
+            "education_level": {
+                "type": "string",
+                "description": "Highest level of education completed."
+            },
+            "education_years": {
+                "type": "string",
+                "description": "Years of Education."
+            },
+            "marital_status": {
+                "type": "string",
+                "description": "Marital status"
             }
         }
     }
