@@ -1,0 +1,61 @@
+$schema: http://json-schema.org/draft-04/schema#
+
+id: "individualSESIndicators"
+title: IndividualSESIndicators
+namespace: https://gen3-dev.core.wits.ac.za
+category: administrative
+program: "*"
+project: "*"
+description: SES indicators for individuals in the study.
+additionalProperties: false
+submittable: true
+validators: null
+systemProperties:
+- membership_id
+- project_id
+- state
+- created_datetime
+- updated_datetime
+links:
+- name: projects
+  backref: sites
+  label: contribute_to
+  target_type: project
+  multiplicity: many_to_many
+  required: true
+required:
+- record_id
+- submitter_id
+- type
+- projects
+uniqueKeys:
+- - record_id
+  - individual_id
+- - project_id
+  - submitter_id
+properties:
+  record_id:
+    type: string
+    description: "Primary key"
+  hdss_name:
+    type: string
+  individual_id:
+    type: string
+    description: "A number uniquely identifying all the records belonging to a specific individual in the data file."
+  source:
+    type: string
+  obs_date:
+    type: string
+    description: "Observation date"
+  currently_working:
+    type: boolean
+    description: "Individual in household currently employed"
+  education_level:
+    type: string
+    description: "Highest level of education completed."
+  education_years:
+    type: string
+    description: "Years of Education."
+  marital_status:
+    type: string
+    description: "Marital status"

@@ -1,0 +1,502 @@
+{
+    "program.yaml": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "program",
+        "title": "Program",
+        "type": "object",
+        "category": "administrative",
+        "program": "*",
+        "project": "*",
+        "description": "A broad framework of goals to be achieved.\n",
+        "additionalProperties": false,
+        "submittable": false,
+        "validators": null,
+        "systemProperties": [
+            "id"
+        ],
+        "required": [
+            "name",
+            "dbgap_accession_number"
+        ],
+        "uniqueKeys": [
+            [
+                "id"
+            ],
+            [
+                "name"
+            ]
+        ],
+        "links": [],
+        "properties": {
+            "type": {
+                "type": "string"
+            },
+            "id": {
+                "$ref": "_definitions.yaml#/UUID",
+                "systemAlias": "node_id"
+            },
+            "name": {
+                "type": "string",
+                "description": "Full name/title of the program."
+            },
+            "dbgap_accession_number": {
+                "type": "string",
+                "description": "The dbgap accession number provided for the program."
+            }
+        }
+    },
+    "project.yaml": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "project",
+        "title": "Project",
+        "type": "object",
+        "program": "*",
+        "project": "*",
+        "category": "administrative",
+        "description": "Any specifically defined piece of work that is undertaken or attempted to meet a single requirement. (NCIt C47885)\n",
+        "additionalProperties": false,
+        "submittable": true,
+        "validators": null,
+        "systemProperties": [
+            "id",
+            "state",
+            "released",
+            "releasable",
+            "intended_release_date"
+        ],
+        "required": [
+            "code",
+            "name",
+            "dbgap_accession_number",
+            "programs"
+        ],
+        "uniqueKeys": [
+            [
+                "id"
+            ],
+            [
+                "code"
+            ]
+        ],
+        "links": [
+            {
+                "name": "programs",
+                "backref": "projects",
+                "label": "member_of",
+                "target_type": "program",
+                "multiplicity": "many_to_one",
+                "required": true
+            }
+        ],
+        "constraints": null,
+        "properties": {
+            "type": {
+                "type": "string"
+            },
+            "id": {
+                "$ref": "_definitions.yaml#/UUID",
+                "systemAlias": "node_id",
+                "description": "UUID for the project."
+            },
+            "name": {
+                "type": "string",
+                "description": "Display name/brief description for the project."
+            },
+            "code": {
+                "type": "string",
+                "description": "Unique identifier for the project."
+            },
+            "investigator_name": {
+                "description": "Name of the principal investigator for the project.",
+                "type": "string"
+            },
+            "investigator_affiliation": {
+                "description": "The investigator's affiliation with respect to a research institution.",
+                "type": "string"
+            },
+            "date_collected": {
+                "description": "The date or date range in which the project data was collected.",
+                "type": "string"
+            },
+            "availability_type": {
+                "description": "Is the project open or restricted?",
+                "enum": [
+                    "Open",
+                    "Restricted"
+                ]
+            },
+            "availability_mechanism": {
+                "description": "Mechanism by which the project will be made avilable.",
+                "type": "string"
+            },
+            "support_source": {
+                "description": "The name of source providing support/grant resources.",
+                "type": "string"
+            },
+            "support_id": {
+                "description": "The ID of the source providing support/grant resources.",
+                "type": "string"
+            },
+            "programs": {
+                "$ref": "_definitions.yaml#/to_one",
+                "description": "Indicates that the project is logically part of the indicated project.\n"
+            },
+            "state": {
+                "description": "The possible states a project can be in.  All but `open` are\nequivalent to some type of locked state.\n",
+                "default": "open",
+                "enum": [
+                    "open",
+                    "review",
+                    "submitted",
+                    "processing",
+                    "closed",
+                    "legacy"
+                ]
+            },
+            "released": {
+                "description": "To release a project is to tell the GDC to include all submitted\nentities in the next GDC index.\n",
+                "default": false,
+                "type": "boolean"
+            },
+            "releasable": {
+                "description": "A project can only be released by the user when `releasable` is true.\n",
+                "default": false,
+                "type": "boolean"
+            },
+            "intended_release_date": {
+                "description": "Tracks a Project's intended release date.",
+                "type": "string",
+                "format": "date-time"
+            },
+            "dbgap_accession_number": {
+                "type": "string",
+                "description": "The dbgap accession number provided for the project."
+            }
+        }
+    },
+    "_terms.yaml": {
+        "id": "_terms",
+        "study_names": {
+            "description": "The name of the study that was authorised to record data.\n"
+        },
+        "standardized_codes": {
+            "description": "Standardized codes or keywords.\n"
+        }
+    },
+    "individual.yaml": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "individual",
+        "title": "Individuals",
+        "type": "object",
+        "namespace": "https://gen3-dev.core.wits.ac.za",
+        "category": "administrative",
+        "program": "*",
+        "project": "*",
+        "description": "Clinical data of patient or individual.",
+        "additionalProperties": false,
+        "submittable": true,
+        "validators": null,
+        "systemProperties": [
+            "id",
+            "project_id",
+            "state",
+            "created_datetime",
+            "updated_datetime"
+        ],
+        "links": [
+            {
+                "name": "projects",
+                "backref": "studies",
+                "label": "contribute_to",
+                "target_type": "project",
+                "multiplicity": "many_to_many",
+                "required": true
+            }
+        ],
+        "required": [
+            "individual_id",
+            "submitter_id",
+            "type",
+            "projects"
+        ],
+        "uniqueKeys": [
+            [
+                "individual_id"
+            ],
+            [
+                "project_id",
+                "submitter_id"
+            ]
+        ],
+        "properties": {
+            "individual_id": {
+                "type": "string"
+            },
+            "hdss_name": {
+                "type": "string"
+            },
+            "home_language": {
+                "type": "string"
+            },
+            "ethnicity": {
+                "type": "string"
+            },
+            "other_ethnicity": {
+                "type": "string"
+            },
+            "mother_id": {
+                "type": "string"
+            },
+            "mother_home_language": {
+                "type": "string"
+            },
+            "mother_ethnicity": {
+                "type": "string"
+            },
+            "mother_other_ethnicity": {
+                "type": "string"
+            },
+            "mat_gmother_home_language": {
+                "type": "string"
+            },
+            "mat_gmother_ethnicity": {
+                "type": "string"
+            },
+            "mat_gmother_other_ethnicity": {
+                "type": "string"
+            },
+            "father_id": {
+                "type": "string"
+            },
+            "father_home_language": {
+                "type": "string"
+            },
+            "father_ethnicity": {
+                "type": "string"
+            },
+            "father_other_ethnicity": {
+                "type": "string"
+            },
+            "mat_gfather_home_language": {
+                "type": "string"
+            },
+            "mat_gfather_ethnicity": {
+                "type": "string"
+            },
+            "mat_gfather_other_ethnicity": {
+                "type": "string"
+            },
+            "sex": {
+                "type": "string"
+            },
+            "dob": {
+                "type": "string"
+            },
+            "dob_estimated": {
+                "type": "string"
+            },
+            "dod": {
+                "type": "string"
+            },
+            "dod_estimated": {
+                "type": "string"
+            },
+            "date_into_dsa": {
+                "type": "string"
+            },
+            "date_out_of_dsa": {
+                "type": "string"
+            }
+        }
+    },
+    "location.yaml": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "location",
+        "title": "Locations",
+        "namespace": "https://gen3-dev.core.wits.ac.za",
+        "category": "administrative",
+        "program": "*",
+        "project": "*",
+        "description": "Location of the individual from whom the data was taken.",
+        "additionalProperties": false,
+        "submittable": true,
+        "validators": null,
+        "systemProperties": [
+            "location_id",
+            "project_id",
+            "state",
+            "created_datetime",
+            "updated_datetime"
+        ],
+        "links": [
+            {
+                "name": "projects",
+                "backref": "sites",
+                "label": "contribute_to",
+                "target_type": "project",
+                "multiplicity": "many_to_many",
+                "required": true
+            }
+        ],
+        "required": [
+            "location_id",
+            "submitter_id",
+            "type",
+            "projects"
+        ],
+        "uniqueKeys": [
+            [
+                "location_id"
+            ],
+            [
+                "project_id",
+                "submitter_id"
+            ]
+        ],
+        "properties": {
+            "location_id": {
+                "type": "string",
+                "description": "A number uniquely identifying a specific location/residency unit in the data file."
+            },
+            "location_type": {
+                "type": "string"
+            },
+            "hdss_name": {
+                "type": "string"
+            },
+            "area": {
+                "type": "string",
+                "description": "Area (site within the HDSS)"
+            },
+            "village": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string"
+            },
+            "latitude": {
+                "type": "string"
+            },
+            "longitude": {
+                "type": "string"
+            }
+        }
+    },
+    "ethnicity.yaml": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "ethnicity",
+        "title": "Ethnicities",
+        "type": "object",
+        "namespace": "https://gen3-dev.core.wits.ac.za",
+        "category": "administrative",
+        "program": "*",
+        "project": "*",
+        "description": "Ethnicity of individual or patient.",
+        "additionalProperties": false,
+        "submittable": true,
+        "validators": null,
+        "systemProperties": [
+            "id",
+            "project_id",
+            "state",
+            "created_datetime",
+            "updated_datetime"
+        ],
+        "links": [
+            {
+                "name": "projects",
+                "backref": "ethnicities",
+                "label": "contribute_to",
+                "target_type": "project",
+                "multiplicity": "many_to_many",
+                "required": true
+            }
+        ],
+        "required": [
+            "code",
+            "submitter_id",
+            "type",
+            "projects"
+        ],
+        "uniqueKeys": [
+            [
+                "code"
+            ],
+            [
+                "project_id",
+                "submitter_id"
+            ]
+        ],
+        "properties": {
+            "code": {
+                "type": "integer"
+            },
+            "description": {
+                "type": "string"
+            },
+            "ethnicity_name": {
+                "type": "string"
+            },
+            "nairobi_code": {
+                "type": "integer"
+            }
+        }
+    },
+    "study.yaml": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "study",
+        "title": "Studies",
+        "type": "object",
+        "namespace": "https://gen3-dev.core.wits.ac.za",
+        "category": "administrative",
+        "program": "*",
+        "project": "*",
+        "description": "Study in which the data will be used.",
+        "additionalProperties": false,
+        "submittable": true,
+        "validators": null,
+        "systemProperties": [
+            "id",
+            "project_id",
+            "state",
+            "created_datetime",
+            "updated_datetime"
+        ],
+        "links": [
+            {
+                "name": "projects",
+                "backref": "studies",
+                "label": "contribute_to",
+                "target_type": "project",
+                "multiplicity": "many_to_many",
+                "required": true
+            }
+        ],
+        "required": [
+            "code",
+            "submitter_id",
+            "type",
+            "projects"
+        ],
+        "uniqueKeys": [
+            [
+                "code"
+            ],
+            [
+                "project_id",
+                "submitter_id"
+            ]
+        ],
+        "properties": {
+            "code": {
+                "type": "integer"
+            },
+            "name": {
+                "type": "string"
+            },
+            "description": {
+                "type": "string"
+            }
+        }
+    }
+}

@@ -1,0 +1,88 @@
+$schema: http://json-schema.org/draft-04/schema#
+
+id: "individual"
+title: Individuals
+type: object
+namespace: https://gen3-dev.core.wits.ac.za
+category: administrative
+program: "*"
+project: "*"
+description: Clinical data of patient or individual.
+additionalProperties: false
+submittable: true
+validators: null
+systemProperties:
+- id
+- project_id
+- state
+- created_datetime
+- updated_datetime
+links:
+- name: projects
+  backref: studies
+  label: contribute_to
+  target_type: project
+  multiplicity: many_to_many
+  required: true
+required:
+- individual_id
+- submitter_id
+- type
+- projects
+uniqueKeys:
+- - individual_id
+- - project_id
+  - submitter_id
+properties:
+  individual_id:
+    type: string
+  hdss_name:
+    type: string
+  home_language:
+    type: string
+  ethnicity:
+    type: string
+  other_ethnicity:
+    type: string
+  mother_id:
+    type: string
+  mother_home_language:
+    type: string
+  mother_ethnicity:
+    type: string
+  mother_other_ethnicity:
+    type: string
+  mat_gmother_home_language:
+    type: string
+  mat_gmother_ethnicity:
+    type: string
+  mat_gmother_other_ethnicity:
+    type: string
+  father_id:
+    type: string
+  father_home_language:
+    type: string
+  father_ethnicity:
+    type: string
+  father_other_ethnicity:
+    type: string
+  mat_gfather_home_language:
+    type: string
+  mat_gfather_ethnicity:
+    type: string
+  mat_gfather_other_ethnicity:
+    type: string
+  sex:
+    type: string
+  dob:
+    type: string
+  dob_estimated:
+    type: string
+  dod:
+    type: string
+  dod_estimated:
+    type: string
+  date_into_dsa:
+    type: string
+  date_out_of_dsa:
+    type: string

@@ -1,0 +1,42 @@
+$schema: http://json-schema.org/draft-04/schema#
+
+id: "study"
+title: Studies
+type: object
+namespace: https://gen3-dev.core.wits.ac.za
+category: administrative
+program: "*"
+project: "*"
+description: Study in which the data will be used.
+additionalProperties: false
+submittable: true
+validators: null
+systemProperties:
+- id
+- project_id
+- state
+- created_datetime
+- updated_datetime
+links:
+- name: projects
+  backref: studies
+  label: contribute_to
+  target_type: project
+  multiplicity: many_to_many
+  required: true
+required:
+- code
+- submitter_id
+- type
+- projects
+uniqueKeys:
+- - code
+- - project_id
+  - submitter_id
+properties:
+  code:
+    type: number
+  name:
+    type: string
+  description:
+    type: string

@@ -1,0 +1,67 @@
+$schema: http://json-schema.org/draft-04/schema#
+
+id: "hhmemberships"
+title: HHMemberships
+namespace: https://gen3-dev.core.wits.ac.za
+category: administrative
+program: "*"
+project: "*"
+description: Household memberships of individuals partaking in the study.
+additionalProperties: false
+submittable: true
+validators: null
+systemProperties:
+- membership_id
+- project_id
+- state
+- created_datetime
+- updated_datetime
+links:
+- name: projects
+  backref: sites
+  label: contribute_to
+  target_type: project
+  multiplicity: many_to_many
+  required: true
+required:
+- location_id
+- submitter_id
+- type
+- projects
+uniqueKeys:
+- - membership_id
+  - hh_id
+  - hhhead_id
+- - project_id
+  - submitter_id
+properties:
+  membership_id:
+    type: string
+    description: "This is the nth-time a member joined this specific household."
+  hdss_name:
+    type: string
+  individual_id:
+    type: string
+    description: "A number uniquely identifying all the records belonging to a specific individual in the data file."
+  hh_id:
+    type: string
+    description: "A number uniquely identifying all the records belonging to a specific household in the data file."
+  start_date:
+    type: string
+    description: "When a member joined a household."
+  end_date:
+    type: string
+    description: "When a member ceased being a household member."
+  hhhead_id:
+    type: string
+    description: "IndividualId of the householdhead (HHH)."
+  hh_relation:
+    type: string
+    description: "Relationship of this member to the household head."
+
+
+
+
+
+
+
