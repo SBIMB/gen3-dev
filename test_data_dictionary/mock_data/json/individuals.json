@@ -1,0 +1,112 @@
+[
+    {
+        "individual_id": "9004135015071",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Zulu",
+        "ethnicity": "Zulu",
+        "mother_id": "6903202112034",
+        "father_id": "6711196362083",
+        "sex": "male",
+        "dob": "1990-04-13",
+        "dod": "N/A"
+    },
+    {
+        "individual_id": "8005177147120",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Sotho",
+        "ethnicity": "Sotho",
+        "mother_id": "6109292414121",
+        "father_id": "5806307325195",
+        "sex": "male",
+        "dob": "1980-05-17",
+        "dod": "2023-07-11"
+    },
+    {
+        "individual_id": "8501225112164",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Zulu",
+        "ethnicity": "Zulu",
+        "mother_id": "6112034224011",
+        "father_id": "6202058811281",
+        "sex": "female",
+        "dob": "1985-01-22",
+        "dod": "N/A"
+    },
+    {
+        "individual_id": "9109156399072",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Xhosa",
+        "ethnicity": "Xhosa",
+        "mother_id": "7302274980024",
+        "father_id": "7009299128071",
+        "sex": "male",
+        "dob": "1991-09-15",
+        "dod": "2020-05-12"
+    },
+    {
+        "individual_id": "7712306681099",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Zulu",
+        "ethnicity": "Zulu",
+        "mother_id": "5707214301031",
+        "father_id": "5408166321066",
+        "sex": "male",
+        "dob": "1977-12-30",
+        "dod": "N/A"
+    },
+    {
+        "individual_id": "8912053134022",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Xhosa",
+        "ethnicity": "Xhosa",
+        "mother_id": "6902144242014",
+        "father_id": "6803157701095",
+        "sex": "female",
+        "dob": "1989-12-05",
+        "dod": "N/A"
+    },
+    {
+        "individual_id": "9404130144023",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Tswana",
+        "ethnicity": "Tswana",
+        "mother_id": "7601224401010",
+        "father_id": "7510178851092",
+        "sex": "female",
+        "dob": "1994-04-13",
+        "dod": "2023-12-24"
+    },
+    {
+        "individual_id": "8707109145081",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Tsonga",
+        "ethnicity": "Tsonga",
+        "mother_id": "6903202112034",
+        "father_id": "6711196362083",
+        "sex": "male",
+        "dob": "1987-07-10",
+        "dod": "N/A"
+    },
+    {
+        "individual_id": "8505091143024",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Venda",
+        "ethnicity": "Venda",
+        "mother_id": "6411024003022",
+        "father_id": "6401297377084",
+        "sex": "female",
+        "dob": "1985-05-09",
+        "dod": "N/A"
+    },
+    {
+        "individual_id": "7906105099064",
+        "hdss_name": "AFRICAN_HEALTHCARE",
+        "home_language": "Ndebele",
+        "ethnicity": "Ndebele",
+        "mother_id": "5501242853012",
+        "father_id": "5310057471099",
+        "sex": "female",
+        "dob": "1979-06-10",
+        "dod": "2022-12-17"
+    }
+]
