@@ -1,0 +1,22 @@
+{
+    "locations": [
+        {
+            "location_id": "893370",
+            "location_type": "urban",
+            "hdss_name": "AFRICAN_HEALTHCARE",
+            "area": "eThekwini",
+            "village": "KwaMashu",
+            "latitude": "29°45'S",
+            "longitude": "30°59'E"
+        },
+        {
+            "location_id": "329946",
+            "location_type": "rural",
+            "hdss_name": "AFRICAN_HEALTHCARE",
+            "area": "Amathole",
+            "village": "Adelaide",
+            "latitude": "32°42'28''S",
+            "longitude": "26°17'44''E"
+        }
+    ]
+}
