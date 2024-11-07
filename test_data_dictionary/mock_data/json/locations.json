@@ -17,6 +17,15 @@
             "village": "Adelaide",
             "latitude": "32°42'28''S",
             "longitude": "26°17'44''E"
+        },
+        {
+            "location_id": "410255",
+            "location_type": "rural",
+            "hdss_name": "AFRICAN_HEALTHCARE",
+            "area": "Bushbuckridge",
+            "village": "Acornhoek",
+            "latitude": "24.593°S",
+            "longitude": "31.097°E"
         }
     ]
 }

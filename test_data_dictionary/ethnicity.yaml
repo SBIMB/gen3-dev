@@ -36,9 +36,5 @@ uniqueKeys:
 properties:
   code:
     type: number
-  description:
-    type: string
   ethnicity_name:
     type: string
-  nairobi_code:
-    type: number

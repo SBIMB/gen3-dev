@@ -1,0 +1,28 @@
+{
+    "studies": [
+        {
+            "code": 101,
+            "name": "HDSS"
+        },
+        {
+            "code": 102,
+            "ethnicity_name": "AWI-GEN I"
+        },
+        {
+            "code": 103,
+            "ethnicity_name": "AWI-GEN II"
+        },
+        {
+            "code": 104,
+            "ethnicity_name": "HAALSI I"
+        },
+        {
+            "code": 105,
+            "ethnicity_name": "HAALSI II"
+        },
+        {
+            "code": 106,
+            "ethnicity_name": "HAALSI III"
+        }
+    ]
+}

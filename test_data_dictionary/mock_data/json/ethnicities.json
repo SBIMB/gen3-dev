@@ -1,0 +1,40 @@
+{
+    "ethnicities": [
+        {
+            "code": 1,
+            "ethnicity_name": "Zulu"
+        },
+        {
+            "code": 2,
+            "ethnicity_name": "Xhosa"
+        },
+        {
+            "code": 3,
+            "ethnicity_name": "Ndebele"
+        },
+        {
+            "code": 4,
+            "ethnicity_name": "Sotho"
+        },
+        {
+            "code": 5,
+            "ethnicity_name": "Venda"
+        },
+        {
+            "code": 6,
+            "ethnicity_name": "Tsonga"
+        },
+        {
+            "code": 7,
+            "ethnicity_name": "Tswana"
+        },
+        {
+            "code": 8,
+            "ethnicity_name": "BaPedi"
+        },
+        {
+            "code": 40,
+            "ethnicity_name": "Swati"
+        }
+    ]
+}
