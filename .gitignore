@@ -16,3 +16,4 @@ minio/private.key
 minio/public.crt
 gen3-sbimb.com.zip
 gen3-sbimb.com/
+python/venv
