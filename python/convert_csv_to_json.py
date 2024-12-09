@@ -30,7 +30,7 @@ for row in json_rows:
 
 ncd_indicators_json = json.dumps(ncd_indicator_object)
 
-with open("ncd_indicators.json", "w") as outfile:
+with open("mouse.json", "w") as outfile:
     outfile.write(ncd_indicators_json)
 
 if __name__ == '__main__':
