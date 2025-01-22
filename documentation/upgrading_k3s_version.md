@@ -1,5 +1,5 @@
-## Upgrading K3s Version to v1.32.0
-The version of our current K3s instance can be checked with the `k3s --version` command. We are going to upgrade our cluster version from `v1.29.4+k3s1` to `v1.32.0+k3s1`. Since our Kubernetes cluster is running on a single node, we will need to temporarily stop the K3s instance while performing the upgrade.   
+## Upgrading K3s Version to v1.31.4
+The version of our current K3s instance can be checked with the `k3s --version` command. We are going to upgrade our cluster version from `v1.29.4+k3s1` to `v1.31.4+k3s1`. Since our Kubernetes cluster is running on a single node, we will need to temporarily stop the K3s instance while performing the upgrade.   
 
 The general form of the command for installing from the installation script is
 ```bash

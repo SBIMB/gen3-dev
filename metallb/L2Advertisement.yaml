@@ -1,8 +1,8 @@
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
-  name: k3s-cloud08-l2advertisment
+  name: k3s-gen3-dev-l2advertisment
   namespace: metallb-system
 spec:
   ipAddressPools:
-  - k3s-cloud08-pool
+  - k3s-gen3-dev-pool

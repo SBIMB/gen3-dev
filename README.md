@@ -101,7 +101,7 @@ Now we need to create two additional resources, an address pool and a layer two 
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: k3s-cloud08-pool
+  name: k3s-gen3-dev-pool
   namespace: metallb-system
 spec:
   addresses:
@@ -112,11 +112,11 @@ spec:
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
-  name: k3s-cloud08-l2advertisment
+  name: k3s-gen3-dev-l2advertisment
   namespace: metallb-system
 spec:
   ipAddressPools:
-  - k3s-cloud08-pool
+  - k3s-gen3-dev-pool
 ```
 To create these resources, we need to run the `kubectl apply -f` command:
 ```bash
