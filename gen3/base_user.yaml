@@ -11,24 +11,16 @@ authz:
     policies:
     - services.sheepdog-admin
     - data_upload
-    - workspace
-    - open_data_reader
-    - all_programs_reader
-    - ReganTestProject_submitter
-    - gen3Project502_submitter
+    - MyFirstProject_submitter
     users:
-    - a0045661@wits.ac.za
-    - regancannell@gmail.com
-    - gen3-user
+    - username1@gmail.com
 
   # can create/update/delete indexd records
   - name: indexd_admins
     policies:
     - indexd_admin
     users:
-    - a0045661@wits.ac.za
-    - regancannell@gmail.com
-    - gen3-user
+    - username1@gmail.com
 
   resources:
   - name: workspace
@@ -44,7 +36,6 @@ authz:
     - name: 'indexd'
       subresources:
       - name: 'admin'
-      - name: 'bundles'
     - name: audit
       subresources:
       - name: presigned_url
@@ -52,16 +43,11 @@ authz:
   - name: open
   - name: programs
     subresources:
-    - name: ReganTestProgram
+    - name: MyFirstProgram
       subresources:
       - name: projects
         subresources:
-        - name: ReganTestProject
-    - name: gen3Program502
-      subresources:
-      - name: projects
-        subresources:
-        - name: P502
+        - name: MyFirstProject
 
   policies:
   - id: workspace
@@ -89,34 +75,21 @@ authz:
     - indexd_admin
     resource_paths:
     - /programs
-    - /services/indexd/admin
   - id: open_data_reader
-    description: data open to all users
     role_ids:
-    - guppy_reader
-    - fence_reader
-    - fence_storage_reader
     - peregrine_reader
-    - sheepdog_reader
+    - guppy_reader
+    - fence_storage_reader
     resource_paths:
     - /open
   - id: all_programs_reader
     role_ids:
-    - open_data_reader
     - peregrine_reader
     - guppy_reader
     - fence_storage_reader
     resource_paths:
     - /programs
-  - id: ReganTestProject_submitter
-    role_ids:
-    - creator
-    - updater
-    - deleter
-    - storage_writer
-    resource_paths:
-    - /programs
-  - id: gen3Project502_submitter
+  - id: MyFirstProject_submitter
     role_ids:
     - reader
     - creator
@@ -125,7 +98,7 @@ authz:
     - storage_reader
     - storage_writer
     resource_paths:
-    - /programs/gen3Program502/projects/P502
+    - /programs/MyFirstProgram/projects/MyFirstProject
 
   roles:
   - id: file_uploader
@@ -196,42 +169,24 @@ authz:
       action:
         service: '*'
         method: read-storage
-  - id: open_data_reader
+  - id: peregrine_reader
     permissions:
-    - id: open_data_reader
+    - id: peregrine_reader
       action:
-        service: '*'
-        method: '*'
+        method: read
+        service: peregrine
   - id: guppy_reader
     permissions:
     - id: guppy_reader
       action:
-        service: 'guppy'
         method: read
+        service: guppy
   - id: fence_storage_reader
     permissions:
     - id: fence_storage_reader
       action:
         method: read-storage
         service: fence
-  - id: fence_reader
-    permissions:
-    - id: fence_reader
-      action:
-        service: fence
-        method: read
-  - id: peregrine_reader
-    permissions:
-    - id: peregrine_reader
-      action:
-        service: 'peregrine'
-        method: read
-  - id: sheepdog_reader
-    permissions:
-    - id: sheepdog_reader
-      action:
-        service: 'sheepdog'
-        method: read
 
 clients:
   wts:
@@ -240,63 +195,13 @@ clients:
     - open_data_reader
 
 users:
-  a0045661@wits.ac.za:
+  username1@gmail.com: {}
+  username2:
     tags:
-      name: Regan Cannell
-      email: a0045661@wits.ac.za
+      name: John Doe
+      email: johndoe@gmail.com
     policies:
-    - services.sheepdog-admin
-    - data_upload
-    - workspace
-    - open_data_reader
-    - all_programs_reader
-    - ReganTestProject_submitter
-    - gen3Project502_submitter
-  scott.hazelhurst@wits.ac.za:
-    tags:
-      name: Scott Hazelhurst
-      email: scott.hazelhurst@wits.ac.za
-    policies:
-    - services.sheepdog-admin
-    - data_upload
-    - workspace
-    - open_data_reader
-    - all_programs_reader
-    - ReganTestProject_submitter
-    - gen3Project502_submitter
-  shaun.aron@wits.ac.za:
-    tags:
-      name: Shaun Aron
-      email: shaun.aron@wits.ac.za
-    policies:
-    - services.sheepdog-admin
-    - data_upload
-    - workspace
-    - open_data_reader
-    - all_programs_reader
-    - ReganTestProject_submitter
-    - gen3Project502_submitter
-  gen3-user:
-    tags:
-      name: Regan Cannell
-      email: a0045661@wits.ac.za
-    policies:
-    - services.sheepdog-admin
-    - data_upload
-    - workspace
-    - open_data_reader
-    - all_programs_reader
-    - ReganTestProject_submitter
-    - gen3Project502_submitter
-  regancannell@gmail.com:
-    tags:
-      name: Regan Cannell
-      email: regancannell@gmail.com
-    policies:
-    - services.sheepdog-admin
-    - data_upload
-    - workspace
-    - open_data_reader
-    - all_programs_reader
-    - ReganTestProject_submitter
-    - gen3Project502_submitter
+    - MyFirstProject_submitter
+
+cloud_providers: {}
+groups: {}
