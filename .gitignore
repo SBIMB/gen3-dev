@@ -17,3 +17,15 @@ minio/public.crt
 gen3-sbimb.com.zip
 gen3-sbimb.com/
 python/venv
+
+
+gen3-minio-client/.env
+gen3-minio-client/.DS_Store
+gen3-minio-client/venv
+gen3-minio-client/output.log
+gen3-minio-client/data/uploads/
+gen3-minio-client/certs/
+gen3-minio-client/gen3-credentials.json
+gen3-minio-client/gen3-minio-credentials.json
+gen3-minio-client/gen3minioclient/output.log
+gen3-minio-client/gen3minioclient/output_manifest_file.tsv
