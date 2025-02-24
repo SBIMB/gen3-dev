@@ -65,7 +65,7 @@
                 "term": {
                     "$ref": "_terms.yaml#/aliquot_quantity"
                 },
-                "type": "integer"
+                "type": "integer" 
             },
             "aliquot_volume": {
                 "term": {

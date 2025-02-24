@@ -6,27 +6,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: cloud08.core.wits.ac.za
-    http:
-      paths:
-      - backend:
-          service:
-            name: revproxy-service
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: www.gen3-sbimb.com
-    http:
-      paths:
-      - backend:
-          service:
-            name: revproxy-service
-            port:
-              number: 80
-        path: /
-        pathType: Prefix
-  - host: gen3-sbimb.com
+  - host: gen3-dev.core.wits.ac.za
     http:
       paths:
       - backend:
@@ -37,12 +17,4 @@ spec:
         path: /
         pathType: Prefix
   tls:
-  - hosts:
-    - cloud08.core.wits.ac.za
-    secretName: cloud08-tls-secret
-  - hosts:
-    - gen3-sbimb.com
-    secretName: gen3-sbimb-secret
-  - hosts:
-    - www.gen3-sbimb.com
-    secretName: gen3-sbimb-secret
+  - secretName: gen3-certs
