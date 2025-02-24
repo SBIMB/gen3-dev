@@ -27,5 +27,9 @@ gen3-minio-client/data/uploads/
 gen3-minio-client/certs/
 gen3-minio-client/gen3-credentials.json
 gen3-minio-client/gen3-minio-credentials.json
+gen3-minio-client/indexing-output-manifest.csv
+gen3-minio-client/gen3minioclient/minio_downloads
 gen3-minio-client/gen3minioclient/output.log
 gen3-minio-client/gen3minioclient/output_manifest_file.tsv
+gen3-minio-client/tests
+gen3-minio-client/data
