@@ -15,7 +15,7 @@ logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 class MinioClient:
     MANIFEST_FIELDS = ['guid', 'file_name', 'md5', 'size', 'acl', 'urls']
         
-    def configure_minio_client(self, gen3_minio_json_file):
+    def __init__(self, gen3_minio_json_file):
         # opening JSON file containing credentials
         f = open(gen3_minio_json_file)
 
@@ -258,13 +258,3 @@ class MinioClient:
                
         return f"File '{file_name}' uploaded successfully and indexd database records updated."
                         
-if __name__ == '__main__':
-    gen3_minio_client = MinioClient()
-    gen3_minio_client.download_file_from_minio_bucket(
-        minio_object_name="Albert-Camus-The-Stranger.pdf",
-        prefix="PREFIX", 
-        guid="d21d4089-b640-4c1c-ac6f-7968d934f9cc", 
-        file_path="./minio_downloads/Albert-Camus-The-Stranger.pdf"
-    )
-
-    
